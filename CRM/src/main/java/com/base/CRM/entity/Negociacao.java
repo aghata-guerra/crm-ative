@@ -3,6 +3,7 @@ package com.base.CRM.entity;
 
 import com.base.CRM.enumClass.Etapa;
 import com.base.CRM.enumClass.StatusNegociacao;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -50,11 +51,14 @@ public class Negociacao {
 
   private LocalDate updatedStageDate;
 
-  @OneToMany(mappedBy = "atividade")
+  @OneToMany(mappedBy = "negociacao", cascade = CascadeType.ALL)
   private List<Atividade> atividadeList = new ArrayList<>();
 
-  @OneToMany(mappedBy = "negociacao")
+  @OneToMany(mappedBy = "negociacao", cascade = CascadeType.ALL)
   private List<ProximoPasso> proximoPasso = new ArrayList<>();
+
+  @OneToMany(mappedBy = "negociacao", cascade = CascadeType.ALL)
+  private List<Diagnostico> diagnosticoList = new ArrayList<>();
 
   public Negociacao(Long id, Lead lead, User user, String origin,
       Etapa stage, StatusNegociacao statusNegociacao, BigDecimal estimatedCost) {
@@ -161,5 +165,21 @@ public class Negociacao {
 
   public void setProximoPasso(List<ProximoPasso> proximoPasso) {
     this.proximoPasso = proximoPasso;
+  }
+
+  public StatusNegociacao getStatusNegociacao() {
+    return statusNegociacao;
+  }
+
+  public void setStatusNegociacao(StatusNegociacao statusNegociacao) {
+    this.statusNegociacao = statusNegociacao;
+  }
+
+  public List<Diagnostico> getDiagnosticoList() {
+    return diagnosticoList;
+  }
+
+  public void setDiagnosticoList(List<Diagnostico> diagnosticoList) {
+    this.diagnosticoList = diagnosticoList;
   }
 }

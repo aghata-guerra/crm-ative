@@ -1,5 +1,6 @@
 package com.base.CRM.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,8 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "lead")
@@ -24,7 +28,7 @@ public class Lead {
 
   private String telephone;
 
-  private String cargo;
+  private String position;
 
   @Column(unique = true, updatable = false)
   private final LocalDateTime createdAt = LocalDateTime.now();
@@ -33,12 +37,15 @@ public class Lead {
   @JoinColumn(name = "companyId")
   private Empresa company;
 
-  public Lead(Long id, String name, String email, String telephone, String cargo, Empresa company) {
+  @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL)
+  private List<Negociacao> negociacaoList = new ArrayList<>();
+
+  public Lead(Long id, String name, String email, String telephone, String position, Empresa company) {
     this.id = id;
     this.name = name;
     this.email = email;
     this.telephone = telephone;
-    this.cargo = cargo;
+    this.position = position;
     this.company = company;
   }
 
@@ -74,12 +81,12 @@ public class Lead {
     this.telephone = telephone;
   }
 
-  public String getCargo() {
-    return cargo;
+  public String getPosition() {
+    return position;
   }
 
-  public void setCargo(String cargo) {
-    this.cargo = cargo;
+  public void setPosition(String position) {
+    this.position = position;
   }
 
   public LocalDateTime getCreatedAt() {
@@ -92,5 +99,13 @@ public class Lead {
 
   public void setCompany(Empresa company) {
     this.company = company;
+  }
+
+  public List<Negociacao> getNegociacaoList() {
+    return negociacaoList;
+  }
+
+  public void setNegociacaoList(List<Negociacao> negociacaoList) {
+    this.negociacaoList = negociacaoList;
   }
 }

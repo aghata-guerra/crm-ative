@@ -1,5 +1,6 @@
 package com.base.CRM.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,7 +37,7 @@ public class Lead {
   @JoinColumn(name = "companyId")
   private Empresa company;
 
-  @OneToMany(mappedBy = "lead")
+  @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL)
   private List<Negociacao> negociacaoList = new ArrayList<>();
 
   public Lead(Long id, String name, String email, String telephone, String position, Empresa company) {

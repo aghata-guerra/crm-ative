@@ -2,7 +2,7 @@ package com.base.CRM.entity;
 
 
 import com.base.CRM.enumClass.Etapa;
-import com.base.CRM.enumClass.Status;
+import com.base.CRM.enumClass.StatusNegociacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -39,7 +40,7 @@ public class Negociacao {
   private Etapa stage;
 
   @Enumerated(EnumType.STRING)
-  private Status status;
+  private StatusNegociacao statusNegociacao;
 
   private BigDecimal estimatedCost;
 
@@ -53,19 +54,25 @@ public class Negociacao {
   @JoinColumn(name = "atividadeId")
   private List<Atividade> atividadeList = new ArrayList<>();
 
-  public Negociacao(Long id, Lead lead, User user, String origin, Etapa stage, Status status,
-      BigDecimal estimatedCost, LocalDate startDate, LocalDate finalDate,
-      LocalDate updatedStageDate) {
+  @OneToMany(mappedBy = "negociacao")
+  private List<ProximoPasso> proximoPasso;
+
+  public Negociacao(Long id, Lead lead, User user, List<ProximoPasso> proximoPasso, String origin,
+      Etapa stage, StatusNegociacao statusNegociacao, BigDecimal estimatedCost, LocalDate startDate,
+      LocalDate finalDate,
+      LocalDate updatedStageDate, List<Atividade> atividadeList) {
     this.id = id;
     this.lead = lead;
     this.user = user;
+    this.proximoPasso = proximoPasso;
     this.origin = origin;
     this.stage = stage;
-    this.status = status;
+    this.statusNegociacao = statusNegociacao;
     this.estimatedCost = estimatedCost;
     this.startDate = startDate;
     this.finalDate = finalDate;
     this.updatedStageDate = updatedStageDate;
+    this.atividadeList = atividadeList;
   }
 
   public Long getId() {
@@ -108,12 +115,12 @@ public class Negociacao {
     this.stage = stage;
   }
 
-  public Status getStatus() {
-    return status;
+  public StatusNegociacao getStatus() {
+    return statusNegociacao;
   }
 
-  public void setStatus(Status status) {
-    this.status = status;
+  public void setStatus(StatusNegociacao statusNegociacao) {
+    this.statusNegociacao = statusNegociacao;
   }
 
   public BigDecimal getEstimatedCost() {
@@ -146,5 +153,21 @@ public class Negociacao {
 
   public void setUpdatedStageDate(LocalDate updatedStageDate) {
     this.updatedStageDate = updatedStageDate;
+  }
+
+  public List<Atividade> getAtividadeList() {
+    return atividadeList;
+  }
+
+  public void setAtividadeList(List<Atividade> atividadeList) {
+    this.atividadeList = atividadeList;
+  }
+
+  public List<ProximoPasso> getProximoPasso() {
+    return proximoPasso;
+  }
+
+  public void setProximoPasso(List<ProximoPasso> proximoPasso) {
+    this.proximoPasso = proximoPasso;
   }
 }

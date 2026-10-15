@@ -8,7 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
@@ -41,6 +40,12 @@ public class User implements UserDetails {
 
   @OneToMany(mappedBy = "user")
   private List<Negociacao> negociacaoList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user")
+  private List<Atividade> atividadeList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user")
+  private List<ProximoPasso> proximoPassoList;
 
   public User(Long id, String name, String email, String password, Profile profile,
       Boolean active) {
@@ -102,6 +107,14 @@ public class User implements UserDetails {
 
   public void setNegociacaoList(List<Negociacao> negociacaoList) {
     this.negociacaoList = negociacaoList;
+  }
+
+  public List<ProximoPasso> getProximoPassoList() {
+    return proximoPassoList;
+  }
+
+  public void setProximoPassoList(List<ProximoPasso> proximoPassoList) {
+    this.proximoPassoList = proximoPassoList;
   }
 
   @Override

@@ -36,7 +36,7 @@ public class ProximoPasso {
 
   private LocalDate finishedAt;
 
-  private LocalDate createdAt = LocalDate.now();
+  private final LocalDate createdAt = LocalDate.now();
 
   public ProximoPasso(Long id, Negociacao negociacao, User user, String description,
       LocalDate expectedDate, StatusProximoPasso statusProximoPasso) {
@@ -108,7 +108,4 @@ public class ProximoPasso {
     return createdAt;
   }
 
-  public void setCreatedAt(LocalDate createdAt) {
-    this.createdAt = createdAt;
-  }
 }

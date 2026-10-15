@@ -47,6 +47,9 @@ public class User implements UserDetails {
   @OneToMany(mappedBy = "user")
   private List<ProximoPasso> proximoPassoList = new ArrayList<>();
 
+  @OneToMany(mappedBy = "user")
+  private List<Diagnostico> diagnosticoList = new ArrayList<>();
+
   public User(Long id, String name, String email, String password, Profile profile,
       Boolean active) {
     this.id = id;
@@ -123,6 +126,14 @@ public class User implements UserDetails {
 
   public void setProximoPassoList(List<ProximoPasso> proximoPassoList) {
     this.proximoPassoList = proximoPassoList;
+  }
+
+  public List<Diagnostico> getDiagnosticoList() {
+    return diagnosticoList;
+  }
+
+  public void setDiagnosticoList(List<Diagnostico> diagnosticoList) {
+    this.diagnosticoList = diagnosticoList;
   }
 
   @Override

@@ -7,8 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "lead")
@@ -32,6 +35,9 @@ public class Lead {
   @ManyToOne
   @JoinColumn(name = "companyId")
   private Empresa company;
+
+  @OneToMany(mappedBy = "lead")
+  private List<Negociacao> negociacaoList = new ArrayList<>();
 
   public Lead(Long id, String name, String email, String telephone, String cargo, Empresa company) {
     this.id = id;
@@ -92,5 +98,13 @@ public class Lead {
 
   public void setCompany(Empresa company) {
     this.company = company;
+  }
+
+  public List<Negociacao> getNegociacaoList() {
+    return negociacaoList;
+  }
+
+  public void setNegociacaoList(List<Negociacao> negociacaoList) {
+    this.negociacaoList = negociacaoList;
   }
 }

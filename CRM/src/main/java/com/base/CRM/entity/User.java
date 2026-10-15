@@ -3,10 +3,15 @@ package com.base.CRM.entity;
 import com.base.CRM.enumClass.Profile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -29,9 +34,13 @@ public class User implements UserDetails {
 
   private String password;
 
+  @Enumerated(EnumType.STRING)
   private Profile profile;
 
   private Boolean active;
+
+  @OneToMany(mappedBy = "user")
+  private List<Negociacao> negociacaoList = new ArrayList<>();
 
   public User(Long id, String name, String email, String password, Profile profile,
       Boolean active) {
@@ -85,6 +94,14 @@ public class User implements UserDetails {
 
   public void setActive(Boolean active) {
     this.active = active;
+  }
+
+  public List<Negociacao> getNegociacaoList() {
+    return negociacaoList;
+  }
+
+  public void setNegociacaoList(List<Negociacao> negociacaoList) {
+    this.negociacaoList = negociacaoList;
   }
 
   @Override

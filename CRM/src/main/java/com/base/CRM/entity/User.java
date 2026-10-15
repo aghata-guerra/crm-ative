@@ -109,6 +109,14 @@ public class User implements UserDetails {
     this.negociacaoList = negociacaoList;
   }
 
+  public List<Atividade> getAtividadeList() {
+    return atividadeList;
+  }
+
+  public void setAtividadeList(List<Atividade> atividadeList) {
+    this.atividadeList = atividadeList;
+  }
+
   public List<ProximoPasso> getProximoPassoList() {
     return proximoPassoList;
   }

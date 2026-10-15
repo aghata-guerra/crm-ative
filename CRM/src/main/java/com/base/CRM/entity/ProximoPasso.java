@@ -39,15 +39,13 @@ public class ProximoPasso {
   private LocalDate createdAt = LocalDate.now();
 
   public ProximoPasso(Long id, Negociacao negociacao, User user, String description,
-      LocalDate expectedDate, StatusProximoPasso statusProximoPasso,
-      LocalDate createdAt) {
+      LocalDate expectedDate, StatusProximoPasso statusProximoPasso) {
     this.id = id;
     this.negociacao = negociacao;
     this.user = user;
     this.description = description;
     this.expectedDate = expectedDate;
     this.statusProximoPasso = statusProximoPasso;
-    this.createdAt = createdAt;
   }
 
   public Long getId() {

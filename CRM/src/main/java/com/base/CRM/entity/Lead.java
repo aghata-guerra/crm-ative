@@ -27,7 +27,7 @@ public class Lead {
 
   private String telephone;
 
-  private String cargo;
+  private String position;
 
   @Column(unique = true, updatable = false)
   private final LocalDateTime createdAt = LocalDateTime.now();
@@ -39,12 +39,12 @@ public class Lead {
   @OneToMany(mappedBy = "lead")
   private List<Negociacao> negociacaoList = new ArrayList<>();
 
-  public Lead(Long id, String name, String email, String telephone, String cargo, Empresa company) {
+  public Lead(Long id, String name, String email, String telephone, String position, Empresa company) {
     this.id = id;
     this.name = name;
     this.email = email;
     this.telephone = telephone;
-    this.cargo = cargo;
+    this.position = position;
     this.company = company;
   }
 
@@ -80,12 +80,12 @@ public class Lead {
     this.telephone = telephone;
   }
 
-  public String getCargo() {
-    return cargo;
+  public String getPosition() {
+    return position;
   }
 
-  public void setCargo(String cargo) {
-    this.cargo = cargo;
+  public void setPosition(String position) {
+    this.position = position;
   }
 
   public LocalDateTime getCreatedAt() {

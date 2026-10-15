@@ -44,7 +44,7 @@ public class Negociacao {
 
   private BigDecimal estimatedCost;
 
-  private LocalDate startDate;
+  private LocalDate startDate = LocalDate.now();
 
   private LocalDate finalDate;
 
@@ -55,24 +55,17 @@ public class Negociacao {
   private List<Atividade> atividadeList = new ArrayList<>();
 
   @OneToMany(mappedBy = "negociacao")
-  private List<ProximoPasso> proximoPasso;
+  private List<ProximoPasso> proximoPasso = new ArrayList<>();
 
-  public Negociacao(Long id, Lead lead, User user, List<ProximoPasso> proximoPasso, String origin,
-      Etapa stage, StatusNegociacao statusNegociacao, BigDecimal estimatedCost, LocalDate startDate,
-      LocalDate finalDate,
-      LocalDate updatedStageDate, List<Atividade> atividadeList) {
+  public Negociacao(Long id, Lead lead, User user, String origin,
+      Etapa stage, StatusNegociacao statusNegociacao, BigDecimal estimatedCost) {
     this.id = id;
     this.lead = lead;
     this.user = user;
-    this.proximoPasso = proximoPasso;
     this.origin = origin;
     this.stage = stage;
     this.statusNegociacao = statusNegociacao;
     this.estimatedCost = estimatedCost;
-    this.startDate = startDate;
-    this.finalDate = finalDate;
-    this.updatedStageDate = updatedStageDate;
-    this.atividadeList = atividadeList;
   }
 
   public Long getId() {

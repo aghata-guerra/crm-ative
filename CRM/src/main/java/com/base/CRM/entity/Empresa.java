@@ -31,7 +31,7 @@ public class Empresa {
   private String telephone;
 
   @Column(nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+  private final LocalDateTime createdAt = LocalDateTime.now();
 
   @OneToMany(mappedBy = "empresa")
   private List<Lead> leadList = new ArrayList<>();

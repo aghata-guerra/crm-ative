@@ -45,7 +45,7 @@ public class User implements UserDetails {
   private List<Atividade> atividadeList = new ArrayList<>();
 
   @OneToMany(mappedBy = "user")
-  private List<ProximoPasso> proximoPassoList;
+  private List<ProximoPasso> proximoPassoList = new ArrayList<>();
 
   public User(Long id, String name, String email, String password, Profile profile,
       Boolean active) {

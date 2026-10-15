@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -22,10 +23,12 @@ public class Atividade {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToMany(mappedBy = "atividade")
+  @ManyToOne
+  @JoinColumn(name = "atividadeId")
   private Negociacao negociacao;
 
-  @OneToMany(mappedBy = "atividade")
+  @ManyToOne
+  @JoinColumn(name = "userId")
   private User user;
 
   @Enumerated(EnumType.STRING)

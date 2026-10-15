@@ -50,8 +50,7 @@ public class Negociacao {
 
   private LocalDate updatedStageDate;
 
-  @ManyToOne
-  @JoinColumn(name = "atividadeId")
+  @OneToMany(mappedBy = "atividade")
   private List<Atividade> atividadeList = new ArrayList<>();
 
   @OneToMany(mappedBy = "negociacao")

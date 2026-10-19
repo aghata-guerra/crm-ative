@@ -21,7 +21,7 @@ public class EmpresaService {
 
   public EmpresaDto createEmpresaDto(String cnpj) throws IOException, InterruptedException {
 
-    if (cnpj.length() != 14){
+    if (cnpj.length() != 18){
       throw new IncorrectCnpjException();
     } else {
       EmpresaCreateDto empresaCreateDto = consultApiCnpj.consultCnpj(cnpj);

@@ -49,7 +49,7 @@ public class Negociacao {
 
   private LocalDate finalDate;
 
-  private LocalDate updatedStageDate;
+  private LocalDate updatedStageDate = LocalDate.now();
 
   @OneToMany(mappedBy = "negociacao", cascade = CascadeType.ALL)
   private List<Atividade> atividadeList = new ArrayList<>();

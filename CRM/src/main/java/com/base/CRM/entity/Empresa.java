@@ -36,10 +36,11 @@ public class Empresa {
   @Column(nullable = false, updatable = false)
   private final LocalDateTime createdAt = LocalDateTime.now();
 
-  @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
   private List<Lead> leadList = new ArrayList<>();
 
-  public Empresa(String companyName, String tradeName, String cnpj, String telephone, String email) {
+  public Empresa(Long id, String companyName, String tradeName, String cnpj, String telephone, String email) {
+    this.id = id;
     this.companyName = companyName;
     this.tradeName = tradeName;
     this.cnpj = cnpj;

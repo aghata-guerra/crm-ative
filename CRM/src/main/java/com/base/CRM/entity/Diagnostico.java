@@ -33,10 +33,10 @@ public class Diagnostico {
 
   private String needs;
 
-  private LocalDate updatedAt;
+  private LocalDate updatedAt = LocalDate.now();
 
   public Diagnostico(Long id, Negociacao negociacao, User user, Integer companySize,
-      String currentSituation, String mainDifficulty, String needs, LocalDate updatedAt) {
+      String currentSituation, String mainDifficulty, String needs) {
     this.id = id;
     this.negociacao = negociacao;
     this.user = user;
@@ -44,7 +44,6 @@ public class Diagnostico {
     this.currentSituation = currentSituation;
     this.mainDifficulty = mainDifficulty;
     this.needs = needs;
-    this.updatedAt = updatedAt;
   }
 
   public Long getId() {

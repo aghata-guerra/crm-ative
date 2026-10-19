@@ -29,6 +29,8 @@ public class Empresa {
   @Column(unique = true)
   private String cnpj;
 
+  private String email;
+
   private String telephone;
 
   @Column(nullable = false, updatable = false)
@@ -37,12 +39,12 @@ public class Empresa {
   @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
   private List<Lead> leadList = new ArrayList<>();
 
-  public Empresa(String telephone, String cnpj, String tradeName, String companyName, Long id) {
-    this.telephone = telephone;
-    this.cnpj = cnpj;
-    this.tradeName = tradeName;
+  public Empresa(String companyName, String tradeName, String cnpj, String telephone, String email) {
     this.companyName = companyName;
-    this.id = id;
+    this.tradeName = tradeName;
+    this.cnpj = cnpj;
+    this.telephone = telephone;
+    this.email = email;
   }
 
   public List<Lead> getLeadList() {
@@ -91,5 +93,17 @@ public class Empresa {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
   }
 }

@@ -8,6 +8,7 @@ import com.base.CRM.entity.Empresa;
 import com.base.CRM.entity.dto.EmpresaCreateDto;
 import com.base.CRM.entity.dto.EmpresaDto;
 import com.base.CRM.entity.dto.TelefoneCreateDto;
+import com.base.CRM.exception.IncorrectCnpjException;
 import com.base.CRM.repository.EmpresaRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,4 +53,28 @@ class EmpresaServiceTest {
 
   }
 
+  @Test
+  @DisplayName("Deve lançar uma exceção de CNPJ incorreto")
+  public void shouldThrowIncorrectCnpjException() throws IOException, InterruptedException {
+
+    assertThrows(IncorrectCnpjException.class, () -> empresaService.createEmpresa("1234567"));
+
+  }
+
+  @Test
+  @DisplayName("Deve retornar lista de empresas")
+  public void shouldReturnListOfEmpresas(){
+    Empresa empresa = new Empresa(1L , "EmpresaTeste", "EmpresaTeste", "95.282.948/0001-93", "8112345678", "empresa@empresa.com");
+
+    Mockito.when(empresaRepository.findAll()).thenReturn(List.of(empresa));
+
+    List<EmpresaDto> listEmpresas = empresaService.findAllEmpresas();
+
+    assertAll(
+        () -> assertEquals(1, listEmpresas.size()),
+        () -> assertEquals(1L, listEmpresas.get(0).id())
+    );
+
+
+  }
 }

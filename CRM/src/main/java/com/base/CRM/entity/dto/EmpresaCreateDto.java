@@ -24,6 +24,7 @@ public record EmpresaCreateDto(
         : null;
 
     return new Empresa(
+        null,
         companyName,
         tradeName,
         cnpj,

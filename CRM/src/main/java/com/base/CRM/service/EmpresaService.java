@@ -19,7 +19,7 @@ public class EmpresaService {
     this.consultApiCnpj = consultApiCnpj;
   }
 
-  public EmpresaDto createEmpresaDto(String cnpj) throws IOException, InterruptedException {
+  public EmpresaDto createEmpresa(String cnpj) throws IOException, InterruptedException {
 
     if (cnpj.length() != 18){
       throw new IncorrectCnpjException();

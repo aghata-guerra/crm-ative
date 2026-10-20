@@ -38,6 +38,9 @@ public class ProximoPasso {
 
   private final LocalDate createdAt = LocalDate.now();
 
+  public ProximoPasso() {
+  }
+
   public ProximoPasso(Long id, Negociacao negociacao, User user, String description,
       LocalDate expectedDate, StatusProximoPasso statusProximoPasso) {
     this.id = id;

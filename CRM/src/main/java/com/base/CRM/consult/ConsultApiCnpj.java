@@ -25,9 +25,23 @@ public class ConsultApiCnpj {
 
     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-    ObjectMapper mapper = new ObjectMapper();
 
-    return mapper.readValue(response.body(), EmpresaCreateDto.class);
+
+
+    if(response.statusCode() == 200){
+
+      if(response.body().isBlank() || response.body() == null){
+        throw new RuntimeException("Resposta da API vazia!");
+      }
+
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.readValue(response.body(), EmpresaCreateDto.class);
+
+    } else {
+      throw new RuntimeException("Erro ao consultar CNPJ. Código HTTP: " + response.statusCode());
+    }
+
+
 
   }
 

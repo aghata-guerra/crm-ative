@@ -60,6 +60,9 @@ public class Negociacao {
   @OneToMany(mappedBy = "negociacao", cascade = CascadeType.ALL)
   private List<Diagnostico> diagnosticoList = new ArrayList<>();
 
+  public Negociacao() {
+  }
+
   public Negociacao(Long id, Lead lead, User user, String origin,
       Etapa stage, StatusNegociacao statusNegociacao, BigDecimal estimatedCost) {
     this.id = id;

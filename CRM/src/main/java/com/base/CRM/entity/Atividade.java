@@ -41,6 +41,10 @@ public class Atividade {
   @Column(updatable = false, nullable = false)
   private final LocalDate createdAt = LocalDate.now();
 
+
+  public Atividade() {
+  }
+
   public Atividade(Long id, Negociacao negociacao, User user, Tipo type, String description,
       LocalDate happenDate) {
     this.id = id;

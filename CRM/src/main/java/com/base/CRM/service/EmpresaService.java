@@ -1,6 +1,7 @@
 package com.base.CRM.service;
 
 import com.base.CRM.consult.ConsultApiCnpj;
+import com.base.CRM.entity.Empresa;
 import com.base.CRM.entity.dto.EmpresaCreateDto;
 import com.base.CRM.entity.dto.EmpresaDto;
 import com.base.CRM.exception.EmpresaNotFoundException;
@@ -42,8 +43,8 @@ public class EmpresaService {
 
   // Read Empresa by Id
 
-  public EmpresaDto findEmpresaById(Long id){
-    return EmpresaDto.fromEntity(empresaRepository.findById(id).orElseThrow(EmpresaNotFoundException::new));
+  public Empresa findEmpresaById(Long id){
+    return empresaRepository.findById(id).orElseThrow(EmpresaNotFoundException::new);
   }
 
   // Read Empresa By Cnpj

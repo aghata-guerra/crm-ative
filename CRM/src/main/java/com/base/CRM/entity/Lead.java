@@ -30,7 +30,7 @@ public class Lead {
 
   private String position;
 
-  @Column(unique = true, updatable = false)
+  @Column(nullable = false, updatable = false)
   private final LocalDateTime createdAt = LocalDateTime.now();
 
   @ManyToOne

@@ -1,6 +1,8 @@
 package com.base.CRM.consult;
 
 import com.base.CRM.entity.dto.EmpresaCreateDto;
+import com.base.CRM.exception.CnpjNotFoundException;
+import com.base.CRM.exception.ServerApiErrorException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -37,8 +39,21 @@ public class ConsultApiCnpj {
       ObjectMapper mapper = new ObjectMapper();
       return mapper.readValue(response.body(), EmpresaCreateDto.class);
 
-    } else {
-      throw new RuntimeException("Erro ao consultar CNPJ. Código HTTP: " + response.statusCode());
+    }
+
+    switch (response.statusCode()){
+      case 404:
+        throw new CnpjNotFoundException();
+      case 500:
+        throw new ServerApiErrorException("Erro no servidor status code: 500" );
+      case 502:
+        throw new ServerApiErrorException("Erro no servidor status code: 502" );
+      case 503:
+        throw new ServerApiErrorException("Erro no servidor status code: 503" );
+      case 504:
+        throw new ServerApiErrorException("Erro no servidor status code: 504" );
+      default:
+        throw new ServerApiErrorException("Erro status code: " + response.statusCode());
     }
 
 

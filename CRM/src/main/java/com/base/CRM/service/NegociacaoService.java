@@ -72,6 +72,29 @@ public class NegociacaoService {
 
   }
 
+  public List<NegociacaoDto> getAllNegociacaoByEtapa(Etapa etapa){
+
+    return negociacaoRepository.findByEtapa(etapa)
+        .stream()
+        .map(NegociacaoDto::fromEntity)
+        .toList();
+
+  }
+
+  public List<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatus
+      (Integer daysOnHold, StatusNegociacao status){
+
+    LocalDate deadLine = LocalDate.now().minusDays(daysOnHold);
+
+    return negociacaoRepository.findByUpdatedStageDateBeforeAndStatusNegociacao(deadLine, status)
+        .stream()
+        .map(
+            NegociacaoDto::fromEntity
+        )
+        .toList();
+
+  }
+
 
 
 

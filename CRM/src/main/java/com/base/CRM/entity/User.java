@@ -50,6 +50,9 @@ public class User implements UserDetails {
   @OneToMany(mappedBy = "user")
   private List<Diagnostico> diagnosticoList = new ArrayList<>();
 
+  public User() {
+  }
+
   public User(Long id, String name, String email, String password, Profile profile,
       Boolean active) {
     this.id = id;
@@ -153,21 +156,21 @@ public class User implements UserDetails {
 
   @Override
   public boolean isAccountNonExpired() {
-    return !active;
+    return active;
   }
 
   @Override
   public boolean isAccountNonLocked() {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isCredentialsNonExpired() {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isEnabled() {
-    return false;
+    return true;
   }
 }

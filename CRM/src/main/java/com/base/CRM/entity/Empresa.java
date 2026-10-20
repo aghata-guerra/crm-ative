@@ -39,6 +39,9 @@ public class Empresa {
   @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
   private List<Lead> leadList = new ArrayList<>();
 
+  public Empresa() {
+  }
+
   public Empresa(Long id, String companyName, String tradeName, String cnpj, String telephone, String email) {
     this.id = id;
     this.companyName = companyName;

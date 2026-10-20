@@ -35,6 +35,9 @@ public class Diagnostico {
 
   private LocalDate updatedAt = LocalDate.now();
 
+  public Diagnostico() {
+  }
+
   public Diagnostico(Long id, Negociacao negociacao, User user, Integer companySize,
       String currentSituation, String mainDifficulty, String needs) {
     this.id = id;

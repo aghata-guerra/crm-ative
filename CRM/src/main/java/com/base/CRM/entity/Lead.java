@@ -40,6 +40,9 @@ public class Lead {
   @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL)
   private List<Negociacao> negociacaoList = new ArrayList<>();
 
+  public Lead() {
+  }
+
   public Lead(Long id, String name, String email, String telephone, String position, Empresa company) {
     this.id = id;
     this.name = name;

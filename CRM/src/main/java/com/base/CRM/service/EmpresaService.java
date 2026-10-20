@@ -4,11 +4,13 @@ import com.base.CRM.consult.ConsultApiCnpj;
 import com.base.CRM.entity.Empresa;
 import com.base.CRM.entity.dto.EmpresaCreateDto;
 import com.base.CRM.entity.dto.EmpresaDto;
+import com.base.CRM.exception.EmpresaAlreadyExistsException;
 import com.base.CRM.exception.EmpresaNotFoundException;
 import com.base.CRM.exception.IncorrectCnpjException;
 import com.base.CRM.repository.EmpresaRepository;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,12 +28,34 @@ public class EmpresaService {
 
   public EmpresaDto createEmpresa(String cnpj) throws IOException, InterruptedException {
 
-    if (cnpj.length() != 18){
+    if(cnpj == null){
       throw new IncorrectCnpjException();
-    } else {
-      EmpresaCreateDto empresaCreateDto = consultApiCnpj.consultCnpj(cnpj);
-      return EmpresaDto.fromEntity(empresaRepository.save(empresaCreateDto.toEntity()));
     }
+
+    String normalizedCnpj = cnpj
+        .trim()
+        .replace(".", "")
+        .replace("-", "")
+        .replace("/", "");
+
+    if (normalizedCnpj.length() != 14){
+      throw new IncorrectCnpjException();
+    }
+
+    Optional<Empresa> empresaOptional = empresaRepository.findByCnpj(normalizedCnpj);
+
+    if(empresaOptional.isPresent()){
+      throw new EmpresaAlreadyExistsException(empresaOptional.get().getId(), "Empresa já cadastrada!");
+    }
+
+    EmpresaCreateDto empresaCreateDto = consultApiCnpj.consultCnpj(normalizedCnpj);
+    return EmpresaDto.fromEntity(empresaRepository.save(empresaCreateDto.toEntity()));
+
+  }
+
+  public EmpresaDto createEmpresaManual(EmpresaCreateDto empresaCreateDto){
+
+    return EmpresaDto.fromEntity(empresaRepository.save(empresaCreateDto.toEntity()));
 
   }
 
@@ -41,17 +65,17 @@ public class EmpresaService {
     return empresaRepository.findAll().stream().map(EmpresaDto::fromEntity).toList();
   }
 
-  // Read Empresa by Id
+  // Find Empresa by Id
 
   public Empresa findEmpresaById(Long id){
     return empresaRepository.findById(id).orElseThrow(EmpresaNotFoundException::new);
   }
 
-  // Read Empresa By Cnpj
+  // Find Empresa By Cnpj
 
   public EmpresaDto findEmpresaByCnpj(String cnpj){
 
-    if(cnpj.length() != 18){
+    if(cnpj.length() != 14){
       throw new IncorrectCnpjException();
     } else {
       return EmpresaDto.fromEntity(empresaRepository.findByCnpj(cnpj).orElseThrow(EmpresaNotFoundException::new));

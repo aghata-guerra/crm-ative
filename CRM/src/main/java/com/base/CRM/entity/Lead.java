@@ -24,8 +24,9 @@ public class Lead {
 
   private String name;
 
+  @Column(unique = true)
   private String email;
-
+  @Column(unique = true)
   private String telephone;
 
   private String position;

@@ -21,9 +21,10 @@ public class NegociacaoService {
   private final UserService userService;
 
   public NegociacaoService(NegociacaoRepository negociacaoRepository,
-      LeadService leadService) {
+      LeadService leadService, UserService userService) {
     this.negociacaoRepository = negociacaoRepository;
     this.leadService = leadService;
+    this.userService = userService;
   }
 
   public NegociacaoDto createNegociacao(NegociacaoCreateDto negociacaoDto) {

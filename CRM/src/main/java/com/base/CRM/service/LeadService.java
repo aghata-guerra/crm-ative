@@ -5,9 +5,11 @@ import com.base.CRM.entity.Empresa;
 import com.base.CRM.entity.Lead;
 import com.base.CRM.entity.dto.LeadCreateDto;
 import com.base.CRM.entity.dto.LeadDto;
+import com.base.CRM.exception.LeadAlreadyExistsException;
 import com.base.CRM.exception.LeadNotFoundException;
 import com.base.CRM.repository.LeadRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,12 @@ public class LeadService {
   // Create lead
 
   public LeadDto createLead(LeadCreateDto lead){
+
+    Optional<Lead> holderLead = leadRepository.findByEmail(lead.email());
+
+    if(holderLead.isPresent()){
+      throw new LeadAlreadyExistsException("Email já cadastrado no sistema!", holderLead.get().getId());
+    }
 
     Empresa holder = empresaService.findEmpresaById(lead.empresaId());
 

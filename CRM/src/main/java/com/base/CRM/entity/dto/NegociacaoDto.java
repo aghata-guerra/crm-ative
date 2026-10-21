@@ -20,6 +20,7 @@ public record NegociacaoDto(
     LocalDate startDate,
     LocalDate finalDate,
     LocalDate updatedStageDate,
+    String lossReason,
     List<AtividadeDto> atividadeDtoList,
     List<ProximoPassoDto> proximoPassoDtoList,
     List<DiagnosticoDto> diagnosticoDtoList
@@ -39,6 +40,7 @@ public record NegociacaoDto(
             ? negociacao.getFinalDate() : null,
         negociacao.getUpdatedStageDate() != null
             ? negociacao.getUpdatedStageDate() : null,
+        negociacao.getLossReason(),
         negociacao.getAtividadeList() != null
             ? negociacao.getAtividadeList().stream().toList().stream().map(AtividadeDto :: fromEntity).toList()
             : null,

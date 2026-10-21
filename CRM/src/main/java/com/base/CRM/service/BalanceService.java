@@ -23,14 +23,14 @@ public class BalanceService {
   }
 
   @Transactional
-  public Balance addBalanceEarnings(BigDecimal earnings){
+  public void addBalanceEarnings(BigDecimal earnings){
 
     if(earnings.compareTo(BigDecimal.ZERO) >= 0){
 
       Balance balance = overviewBalance();
       balance.setTotalEarnings(balance.getTotalEarnings().add(earnings));
       balance.setCurrentBalance(balance.getCurrentBalance().add(earnings));
-      return balanceRepository.save(balance);
+      balanceRepository.save(balance);
 
     } else {
       throw new LossesPositiveNumberException();
@@ -40,13 +40,13 @@ public class BalanceService {
   }
 
   @Transactional
-  public Balance subtractBalanceEarnings(BigDecimal losses){
+  public void subtractBalanceEarnings(BigDecimal losses){
 
     if(losses.compareTo(BigDecimal.ZERO) <= 0){
       Balance balance = overviewBalance();
       balance.setTotalLosses(balance.getTotalLosses().add(losses));
       balance.setCurrentBalance(balance.getCurrentBalance().add(losses));
-      return balanceRepository.save(balance);
+      balanceRepository.save(balance);
 
     } else {
       throw new LossesPositiveNumberException();

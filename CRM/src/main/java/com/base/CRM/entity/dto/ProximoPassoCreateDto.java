@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public record ProximoPassoCreateDto(
     Long negociacaoId,
-    Long UserId,
+    Long userId,
     String description,
     LocalDate expectedDate,
     StatusProximoPasso statusProximoPasso

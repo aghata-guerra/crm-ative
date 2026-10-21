@@ -19,12 +19,14 @@ public class NegociacaoService {
   private final NegociacaoRepository negociacaoRepository;
   private final LeadService leadService;
   private final UserService userService;
+  private final BalanceService balanceService;
 
   public NegociacaoService(NegociacaoRepository negociacaoRepository,
-      LeadService leadService, UserService userService) {
+      LeadService leadService, UserService userService, BalanceService balanceService) {
     this.negociacaoRepository = negociacaoRepository;
     this.leadService = leadService;
     this.userService = userService;
+    this.balanceService = balanceService;
   }
 
   public NegociacaoDto createNegociacao(NegociacaoCreateDto negociacaoDto) {
@@ -65,6 +67,7 @@ public class NegociacaoService {
 
   public NegociacaoDto updateStageNegociacao(Long negociacaoId, Etapa etapa) {
 
+
     Negociacao negociacao = findNegociacaoById(negociacaoId);
     negociacao.setStage(etapa);
     negociacao.setUpdatedStageDate(LocalDate.now());
@@ -92,6 +95,46 @@ public class NegociacaoService {
             NegociacaoDto::fromEntity
         )
         .toList();
+
+  }
+
+  public List<NegociacaoDto> findAllNegociacaoWithoutProximoPasso(){
+
+    return negociacaoRepository.findByProximoPassoIsEmpty()
+        .stream()
+        .map(
+            NegociacaoDto::fromEntity
+        )
+        .toList();
+  }
+
+  public NegociacaoDto finishNegociacaoAsGain(Long negociacaoId){
+
+    Negociacao negociacao = findNegociacaoById(negociacaoId);
+
+    negociacao.setStatus(StatusNegociacao.ENCERRADA_GANHA);
+
+    balanceService.addBalanceEarnings(negociacao.getEstimatedCost());
+
+    return NegociacaoDto.fromEntity(
+        negociacaoRepository.save(negociacao)
+    );
+
+  }
+
+  public NegociacaoDto finishNegociacaoAsLoss(Long negociacaoId, String lossReason){
+
+    Negociacao negociacao = findNegociacaoById(negociacaoId);
+
+    negociacao.setStatus(StatusNegociacao.ENCERRADA_PERDA);
+
+    balanceService.subtractBalanceEarnings(negociacao.getEstimatedCost().negate());
+
+    negociacao.setLossReason(lossReason);
+
+    return NegociacaoDto.fromEntity(
+        negociacaoRepository.save(negociacao)
+    );
 
   }
 

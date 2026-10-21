@@ -4,15 +4,15 @@ import com.base.CRM.entity.Lead;
 import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.User;
 import com.base.CRM.enumClass.Etapa;
+import com.base.CRM.enumClass.Origin;
 import com.base.CRM.enumClass.StatusNegociacao;
 import java.math.BigDecimal;
 
 public record NegociacaoCreateDto(
     Long leadId,
     Long userId,
-    String origin,
+    Origin origin,
     Etapa stage,
-    StatusNegociacao statusNegociacao,
     BigDecimal estimatedCost
 ) {
 
@@ -23,7 +23,6 @@ public record NegociacaoCreateDto(
         user,
         origin,
         stage,
-        statusNegociacao,
         estimatedCost
     );
   }

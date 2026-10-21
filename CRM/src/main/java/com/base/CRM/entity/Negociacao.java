@@ -2,6 +2,7 @@ package com.base.CRM.entity;
 
 
 import com.base.CRM.enumClass.Etapa;
+import com.base.CRM.enumClass.Origin;
 import com.base.CRM.enumClass.StatusNegociacao;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -35,13 +36,14 @@ public class Negociacao {
   @JoinColumn(name = "userId")
   private User user;
 
-  private String origin;
+  @Enumerated(EnumType.STRING)
+  private Origin origin;
 
   @Enumerated(EnumType.STRING)
   private Etapa stage;
 
   @Enumerated(EnumType.STRING)
-  private StatusNegociacao statusNegociacao;
+  private StatusNegociacao statusNegociacao = StatusNegociacao.EM_NEGOCIACAO;
 
   private BigDecimal estimatedCost;
 
@@ -50,6 +52,8 @@ public class Negociacao {
   private LocalDate finalDate;
 
   private LocalDate updatedStageDate = LocalDate.now();
+
+  private String lossReason;
 
   @OneToMany(mappedBy = "negociacao", cascade = CascadeType.ALL)
   private List<Atividade> atividadeList = new ArrayList<>();
@@ -63,14 +67,13 @@ public class Negociacao {
   public Negociacao() {
   }
 
-  public Negociacao(Long id, Lead lead, User user, String origin,
-      Etapa stage, StatusNegociacao statusNegociacao, BigDecimal estimatedCost) {
+  public Negociacao(Long id, Lead lead, User user, Origin origin,
+      Etapa stage, BigDecimal estimatedCost) {
     this.id = id;
     this.lead = lead;
     this.user = user;
     this.origin = origin;
     this.stage = stage;
-    this.statusNegociacao = statusNegociacao;
     this.estimatedCost = estimatedCost;
   }
 
@@ -98,11 +101,11 @@ public class Negociacao {
     this.user = user;
   }
 
-  public String getOrigin() {
+  public Origin getOrigin() {
     return origin;
   }
 
-  public void setOrigin(String origin) {
+  public void setOrigin(Origin origin) {
     this.origin = origin;
   }
 
@@ -160,6 +163,14 @@ public class Negociacao {
 
   public void setAtividadeList(List<Atividade> atividadeList) {
     this.atividadeList = atividadeList;
+  }
+
+  public String getLossReason() {
+    return lossReason;
+  }
+
+  public void setLossReason(String lossReason) {
+    this.lossReason = lossReason;
   }
 
   public List<ProximoPasso> getProximoPasso() {

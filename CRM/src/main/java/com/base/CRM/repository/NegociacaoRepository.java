@@ -16,4 +16,6 @@ public interface NegociacaoRepository extends JpaRepository<Negociacao, Long> {
   List<Negociacao> findByEtapa(Etapa etapa);
 
   List<Negociacao> findByUpdatedStageDateBeforeAndStatusNegociacao(LocalDate limit, StatusNegociacao statusNegociacao);
+
+  List<Negociacao> findByProximoPassoIsEmpty();
 }

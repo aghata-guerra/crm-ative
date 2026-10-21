@@ -5,6 +5,7 @@ import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.User;
 import com.base.CRM.entity.dto.NegociacaoCreateDto;
 import com.base.CRM.entity.dto.NegociacaoDto;
+import com.base.CRM.entity.dto.NegociacoesPorOrigemDto;
 import com.base.CRM.enumClass.Etapa;
 import com.base.CRM.enumClass.StatusNegociacao;
 import com.base.CRM.exception.NegociacaoNotFoundException;
@@ -136,6 +137,10 @@ public class NegociacaoService {
         negociacaoRepository.save(negociacao)
     );
 
+  }
+
+  public List<NegociacoesPorOrigemDto> countNegociacaoByOrigin() {
+    return negociacaoRepository.countNegociacoesPorOrigem();
   }
 
 

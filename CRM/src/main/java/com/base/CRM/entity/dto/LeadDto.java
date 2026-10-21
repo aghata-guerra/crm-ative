@@ -11,7 +11,7 @@ public record LeadDto(
     String telephone,
     String position,
     LocalDateTime createdAt,
-    Long companyId,
+    Long empresaId,
     List<NegociacaoDto> negociacaoDtoList
 ) {
 

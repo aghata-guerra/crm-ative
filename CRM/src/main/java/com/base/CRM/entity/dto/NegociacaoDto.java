@@ -3,6 +3,7 @@ package com.base.CRM.entity.dto;
 import com.base.CRM.entity.Diagnostico;
 import com.base.CRM.entity.Negociacao;
 import com.base.CRM.enumClass.Etapa;
+import com.base.CRM.enumClass.Origin;
 import com.base.CRM.enumClass.StatusNegociacao;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ public record NegociacaoDto(
     Long id,
     Long leadId,
     Long userId,
-    String origin,
+    Origin origin,
     Etapa stage,
     StatusNegociacao statusNegociacao,
     BigDecimal estimatedCost,

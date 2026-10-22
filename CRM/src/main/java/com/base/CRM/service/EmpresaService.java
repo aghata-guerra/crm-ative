@@ -102,6 +102,20 @@ public class EmpresaService {
 
   public EmpresaDto findEmpresaByCnpj(String cnpj){
 
+    if(cnpj == null){
+      throw new IncorrectCnpjException();
+    }
+
+    String normalizedCnpj = cnpj
+        .trim()
+        .replace(".", "")
+        .replace("-", "")
+        .replace("/", "");
+
+    if (normalizedCnpj.length() != 14){
+      throw new IncorrectCnpjException();
+    }
+
     if(cnpj.length() != 14){
       throw new IncorrectCnpjException();
     } else {

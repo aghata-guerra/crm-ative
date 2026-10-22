@@ -13,6 +13,7 @@ import com.base.CRM.exception.NegociacaoNotFoundException;
 import com.base.CRM.repository.NegociacaoRepository;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -53,6 +54,18 @@ public class NegociacaoService {
 
   public List<NegociacaoDto> findAllNegociacaoByUserId(Long userId) {
     return negociacaoRepository.findByUser_Id(userId).stream().map(
+        NegociacaoDto::fromEntity
+    ).toList();
+  }
+
+  public List<NegociacaoDto> findAllNegociacao(){
+    return negociacaoRepository.findAll().stream().map(
+        NegociacaoDto::fromEntity
+    ).toList();
+  }
+
+  public List<NegociacaoDto> findAllNegociacao(Pageable pageable){
+    return negociacaoRepository.findAll().stream().map(
         NegociacaoDto::fromEntity
     ).toList();
   }

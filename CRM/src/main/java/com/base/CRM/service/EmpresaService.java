@@ -11,6 +11,7 @@ import com.base.CRM.repository.EmpresaRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,8 +56,34 @@ public class EmpresaService {
 
   public EmpresaDto createEmpresaManual(EmpresaCreateDto empresaCreateDto){
 
+    if(empresaCreateDto.cnpj() == null){
+      throw new IncorrectCnpjException();
+    }
+
+    String normalizedCnpj = empresaCreateDto.cnpj()
+        .trim()
+        .replace(".", "")
+        .replace("-", "")
+        .replace("/", "");
+
+    if (normalizedCnpj.length() != 14){
+      throw new IncorrectCnpjException();
+    }
+
+    Optional<Empresa> empresaOptional = empresaRepository.findByCnpj(normalizedCnpj);
+
+    if(empresaOptional.isPresent()){
+      throw new EmpresaAlreadyExistsException(empresaOptional.get().getId(), "Empresa já cadastrada!");
+    }
+
     return EmpresaDto.fromEntity(empresaRepository.save(empresaCreateDto.toEntity()));
 
+  }
+
+  // Read all Empresas
+
+  public List<EmpresaDto> findAllEmpresas(Pageable pageable){
+    return empresaRepository.findAll(pageable).stream().map(EmpresaDto::fromEntity).toList();
   }
 
   // Read all Empresas

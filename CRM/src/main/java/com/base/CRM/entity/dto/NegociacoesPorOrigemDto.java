@@ -1,6 +1,8 @@
 package com.base.CRM.entity.dto;
 
+import com.base.CRM.enumClass.Origin;
+
 public record NegociacoesPorOrigemDto(
-    String origem,
+    Origin origin,
     Long quantidade
 ) {}

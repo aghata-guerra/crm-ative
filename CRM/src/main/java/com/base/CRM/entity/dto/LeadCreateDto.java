@@ -5,6 +5,7 @@ import com.base.CRM.entity.Empresa;
 import com.base.CRM.entity.Lead;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record LeadCreateDto(
@@ -18,7 +19,7 @@ public record LeadCreateDto(
     String telephone,
     @NotBlank(message = "A posição precisa ser preenchida")
     String position,
-    @NotBlank(message = "A empresa precisa ser preenchida")
+    @NotNull(message = "A empresa precisa ser preenchida")
     Long empresaId
 ) {
 

@@ -76,9 +76,9 @@ public class NegociacaoService {
 
   }
 
-  public List<NegociacaoDto> getAllNegociacaoByEtapa(Etapa etapa){
+  public List<NegociacaoDto> getAllNegociacaoByEtapa(Etapa stage){
 
-    return negociacaoRepository.findByEtapa(etapa)
+    return negociacaoRepository.findByStage(stage)
         .stream()
         .map(NegociacaoDto::fromEntity)
         .toList();

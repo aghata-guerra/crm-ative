@@ -15,7 +15,7 @@ public interface NegociacaoRepository extends JpaRepository<Negociacao, Long> {
 
   List<Negociacao> findByLead_Id(Long id);
 
-  List<Negociacao> findByEtapa(Etapa etapa);
+  List<Negociacao> findByStage(Etapa stage);
 
   List<Negociacao> findByUpdatedStageDateBeforeAndStatusNegociacao(LocalDate limit, StatusNegociacao statusNegociacao);
 

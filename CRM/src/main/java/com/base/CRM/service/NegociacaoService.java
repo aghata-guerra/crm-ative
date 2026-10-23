@@ -8,10 +8,12 @@ import com.base.CRM.entity.dto.NegociacaoDto;
 import com.base.CRM.entity.dto.NegociacoesPorOrigemDto;
 import com.base.CRM.enumClass.Etapa;
 import com.base.CRM.enumClass.StatusNegociacao;
+import com.base.CRM.exception.NegociacaoClosedException;
 import com.base.CRM.exception.NegociacaoNotFoundException;
 import com.base.CRM.repository.NegociacaoRepository;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,6 +58,20 @@ public class NegociacaoService {
     ).toList();
   }
 
+  public List<NegociacaoDto> findAllNegociacao(){
+    return negociacaoRepository.findAll().stream().map(
+        NegociacaoDto::fromEntity
+    ).toList();
+  }
+
+  public List<NegociacaoDto> findAllNegociacao(Pageable pageable){
+    return negociacaoRepository.findAll().stream().map(
+        NegociacaoDto::fromEntity
+    ).toList();
+  }
+
+  // Só gestores podem acessar esse metódo
+
   public NegociacaoDto updateStatusNegociacao(Long negociacaoId, StatusNegociacao statusNegociacao) {
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
@@ -68,11 +84,17 @@ public class NegociacaoService {
 
   public NegociacaoDto updateStageNegociacao(Long negociacaoId, Etapa etapa) {
 
-
     Negociacao negociacao = findNegociacaoById(negociacaoId);
+
+    if(verifyIfNegociacaoIsValid(negociacao)){
+
     negociacao.setStage(etapa);
     negociacao.setUpdatedStageDate(LocalDate.now());
     return NegociacaoDto.fromEntity(negociacaoRepository.save(negociacao));
+
+    } else {
+      throw new NegociacaoClosedException();
+    }
 
   }
 
@@ -113,6 +135,8 @@ public class NegociacaoService {
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
 
+    if(verifyIfNegociacaoIsValid(negociacao)){
+
     negociacao.setStatus(StatusNegociacao.ENCERRADA_GANHA);
 
     balanceService.addBalanceEarnings(negociacao.getEstimatedCost());
@@ -121,11 +145,18 @@ public class NegociacaoService {
         negociacaoRepository.save(negociacao)
     );
 
+    } else {
+      throw new NegociacaoNotFoundException();
+    }
+
+
   }
 
   public NegociacaoDto finishNegociacaoAsLoss(Long negociacaoId, String lossReason){
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
+
+    if(verifyIfNegociacaoIsValid(negociacao)){
 
     negociacao.setStatus(StatusNegociacao.ENCERRADA_PERDA);
 
@@ -137,10 +168,24 @@ public class NegociacaoService {
         negociacaoRepository.save(negociacao)
     );
 
+    } else {
+      throw new NegociacaoNotFoundException();
+    }
+
+
   }
 
   public List<NegociacoesPorOrigemDto> countNegociacaoByOrigin() {
     return negociacaoRepository.countNegociacoesPorOrigem();
+  }
+
+  public Boolean verifyIfNegociacaoIsValid(Negociacao negociacao){
+
+    if(negociacao.getStatusNegociacao() == StatusNegociacao.EM_NEGOCIACAO){
+      return true;
+    } else {
+      return false;
+    }
   }
 
 

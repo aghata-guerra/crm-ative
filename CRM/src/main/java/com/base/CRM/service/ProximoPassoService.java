@@ -14,7 +14,9 @@ import com.base.CRM.exception.StatusProximoPassoCantReturnException;
 import com.base.CRM.repository.NegociacaoRepository;
 import com.base.CRM.repository.ProximoPassoRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +40,7 @@ public class ProximoPassoService {
     ));
   }
 
-  public ProximoPassoDto createProximoPasso(Long proximoPassoId, StatusProximoPasso statusProximoPasso){
+  public ProximoPassoDto changeStatusProximoPasso(Long proximoPassoId, StatusProximoPasso statusProximoPasso){
 
     ProximoPasso proximoPasso = findProximoPassoById(proximoPassoId);
 
@@ -66,26 +68,65 @@ public class ProximoPassoService {
 
   }
 
+  public List<ProximoPassoDto> findProximoPassoByNegociacaoId(Long negociacaoId){
+
+    negociacaoService.findNegociacaoById(negociacaoId);
+
+    return proximoPassoRepository.findByNegociacaoId(negociacaoId).stream()
+        .map(
+            ProximoPassoDto::fromEntity
+        ).toList();
+
+  }
+
+  public List<ProximoPassoDto> findByExpectedDateBetweenAndStatus(LocalDate startDate, LocalDate endDate, StatusProximoPasso statusProximoPasso){
+    return proximoPassoRepository.findByExpectedDateBetweenAndStatus(startDate, endDate, statusProximoPasso)
+        .stream()
+        .map(ProximoPassoDto::fromEntity)
+        .toList();
+  }
+
+  public List<ProximoPassoDto> findByProximoPassoByUserId(Long userId){
+    return proximoPassoRepository.findByUserId(userId)
+        .stream()
+        .map(ProximoPassoDto::fromEntity)
+        .toList();
+  }
+
   public ProximoPassoDto alterDateNextContact(LocalDate nextContact, Long proximoPassoId){
 
     ProximoPasso proximoPasso = findProximoPassoById(proximoPassoId);
 
-    if(proximoPasso.getStatusProximoPasso() == StatusProximoPasso.REALIZADA){
-      throw new ProximoPassoAlreadyConcludeException();
+    if(verifyIfProximoPassoIsValid(proximoPasso)){
+
+      if(proximoPasso.getStatusProximoPasso() == StatusProximoPasso.REALIZADA){
+        throw new ProximoPassoAlreadyConcludeException();
+      }
+
+      if(nextContact.isAfter(LocalDate.now())){
+        throw new NextContactDateCantBeAfterTodayException();
+      }
+
+      proximoPasso.setExpectedDate(nextContact);
+
+      if (proximoPasso.getStatusProximoPasso() == StatusProximoPasso.VENCIDA){
+        proximoPasso.setStatusProximoPasso(StatusProximoPasso.AGENDADA);
+      }
+
+      return ProximoPassoDto.fromEntity(proximoPassoRepository.save(proximoPasso));
+
+    } else {
+      throw new StatusProximoPassoCantReturnException();
     }
 
-    if(nextContact.isAfter(LocalDate.now())){
-      throw new NextContactDateCantBeAfterTodayException();
+  }
+
+  public Boolean verifyIfProximoPassoIsValid(ProximoPasso proximoPasso){
+    if (proximoPasso.getStatusProximoPasso() == StatusProximoPasso.REALIZADA){
+      return false;
+    } else {
+      return true;
     }
-
-    proximoPasso.setExpectedDate(nextContact);
-
-    if (proximoPasso.getStatusProximoPasso() == StatusProximoPasso.VENCIDA){
-      proximoPasso.setStatusProximoPasso(StatusProximoPasso.AGENDADA);
-    }
-
-    return ProximoPassoDto.fromEntity(proximoPassoRepository.save(proximoPasso));
-
   }
 
 

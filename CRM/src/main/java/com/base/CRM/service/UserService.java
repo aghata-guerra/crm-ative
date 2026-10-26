@@ -2,6 +2,7 @@ package com.base.CRM.service;
 
 import com.base.CRM.entity.User;
 import com.base.CRM.entity.dto.UserDto;
+import com.base.CRM.exception.UserAlreadyRegistered;
 import com.base.CRM.exception.UserNotFoundException;
 import com.base.CRM.repository.UserRepository;
 import java.util.List;
@@ -19,7 +20,17 @@ public class UserService implements UserDetailsService {
   public UserService(UserRepository userRepository) {
     this.userRepository = userRepository;
   }
-
+  
+  
+  public UserDto createService(UserCreateDto userCreateDto){
+    
+    if(userRepository.findByEmail(userCreateDto.email()).isPresent()){
+      throw new UserAlreadyRegistered();
+    }
+    
+  }
+  
+  
   // Find User By Id
 
   public User findUserById(Long userId){

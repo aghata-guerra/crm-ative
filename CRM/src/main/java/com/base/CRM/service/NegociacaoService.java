@@ -156,13 +156,13 @@ public class NegociacaoService {
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
 
-    if(verifyIfNegociacaoIsValid(negociacao)){
+      if(verifyIfNegociacaoIsValid(negociacao)){
 
-    negociacao.setStatus(StatusNegociacao.ENCERRADA_PERDA);
+      negociacao.setStatus(StatusNegociacao.ENCERRADA_PERDA);
 
-    balanceService.subtractBalanceEarnings(negociacao.getEstimatedCost().negate());
+      balanceService.subtractBalanceEarnings(negociacao.getEstimatedCost().negate());
 
-    negociacao.setLossReason(lossReason);
+      negociacao.setLossReason(lossReason);
 
     return NegociacaoDto.fromEntity(
         negociacaoRepository.save(negociacao)

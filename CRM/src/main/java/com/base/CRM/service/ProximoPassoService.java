@@ -103,7 +103,7 @@ public class ProximoPassoService {
         throw new ProximoPassoAlreadyConcludeException();
       }
 
-      if(nextContact.isAfter(LocalDate.now())){
+      if(nextContact.isBefore(LocalDate.now())){
         throw new NextContactDateCantBeAfterTodayException();
       }
 

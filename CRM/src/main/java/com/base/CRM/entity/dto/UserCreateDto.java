@@ -11,12 +11,12 @@ public record UserCreateDto(
     Boolean active
 ) {
   
-  public User toEntity(){
+  public User toEntity(String encodePassword){
     return new User(
         null,
         name,
         email,
-        password,
+        encodePassword,
         profile,
         active
     );

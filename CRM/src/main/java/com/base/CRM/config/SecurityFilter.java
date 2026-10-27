@@ -6,7 +6,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +20,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserService userService;
+  private final AccountStatusUserDetailsChecker accountStatusUserDetailsChecker = new AccountStatusUserDetailsChecker();
 
   public SecurityFilter(JwtService jwtService, UserService userService) {
     this.jwtService = jwtService;
@@ -30,31 +33,42 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     String token = recoverToken(request);
 
-    if(token != null){
-      String email = jwtService.validateToken(token);
-
-      if(email != null){
-        UserDetails user = userService.loadUserByUsername(email);
-
-        UsernamePasswordAuthenticationToken authentication =
-            UsernamePasswordAuthenticationToken.authenticated(
-                user,
-                null,
-                user.getAuthorities()
-            );
-
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-
-        context.setAuthentication(authentication);
-
-        SecurityContextHolder.setContext(context);
-
-      }
-
+    if (token == null) {
+      filterChain.doFilter(request, response);
+      return;
     }
-
+    
+    String email = jwtService.validateToken(token);
+    
+    if(email == null || email.isBlank()){
+      unauthorized(response);
+      return;
+    }
+    
+    try{
+      
+      UserDetails user = userService.loadUserByUsername(email);
+      
+      accountStatusUserDetailsChecker.check(user);
+      
+      UsernamePasswordAuthenticationToken authentication =
+          UsernamePasswordAuthenticationToken.authenticated(
+              user,
+              null,
+              user.getAuthorities()
+          );
+      
+      SecurityContext context = SecurityContextHolder.getContext();
+      context.setAuthentication(authentication);
+      SecurityContextHolder.setContext(context);
+      
+    } catch (AuthenticationException e){
+      unauthorized(response);
+      return;
+    }
+    
     filterChain.doFilter(request, response);
-
+    
   }
 
   private String recoverToken(HttpServletRequest request) {
@@ -67,6 +81,20 @@ public class SecurityFilter extends OncePerRequestFilter {
       return authorizationHeader.substring(7);
     }
 
+  }
+
+  private void unauthorized(HttpServletResponse response) throws IOException {
+
+    SecurityContextHolder.clearContext();
+    
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    
+    response.getWriter().write(
+        "{\"message\":\"Autenticação inválida ou expirada.\"}"
+    );
+    
   }
 
 

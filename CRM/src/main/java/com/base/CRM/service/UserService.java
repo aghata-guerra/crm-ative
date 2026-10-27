@@ -1,6 +1,7 @@
 package com.base.CRM.service;
 
 import com.base.CRM.entity.User;
+import com.base.CRM.entity.dto.UserCreateDto;
 import com.base.CRM.entity.dto.UserDto;
 import com.base.CRM.exception.UserAlreadyRegistered;
 import com.base.CRM.exception.UserNotFoundException;
@@ -10,15 +11,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
   }
   
   
@@ -27,6 +31,10 @@ public class UserService implements UserDetailsService {
     if(userRepository.findByEmail(userCreateDto.email()).isPresent()){
       throw new UserAlreadyRegistered();
     }
+    
+    String password = passwordEncoder.encode(userCreateDto.password());
+    
+    return UserDto.fromEntity(userRepository.save(userCreateDto.toEntity(password)));
     
   }
   

@@ -16,8 +16,9 @@ public class JwtService {
   @Value("${api.security.token.secret}")
   private final String secret_key;
 
-  public JwtService(String secretKey) {
-    secret_key = secretKey;
+  public JwtService(
+      @Value("${api.security.token.secret}") String secret_key) {
+    this.secret_key = secret_key;
   }
 
   public String generateJwtToken(UserDetails userDetails){

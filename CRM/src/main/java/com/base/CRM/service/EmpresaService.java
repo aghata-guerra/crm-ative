@@ -11,6 +11,8 @@ import com.base.CRM.repository.EmpresaRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -82,8 +84,8 @@ public class EmpresaService {
 
   // Read all Empresas
 
-  public List<EmpresaDto> findAllEmpresas(Pageable pageable){
-    return empresaRepository.findAll(pageable).stream().map(EmpresaDto::fromEntity).toList();
+  public Page<EmpresaDto> findAllEmpresas(Pageable pageable){
+    return empresaRepository.findAll(pageable).map(EmpresaDto::fromEntity);
   }
 
   // Read all Empresas

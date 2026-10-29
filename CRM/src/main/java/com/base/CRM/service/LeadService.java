@@ -10,6 +10,8 @@ import com.base.CRM.exception.LeadNotFoundException;
 import com.base.CRM.repository.LeadRepository;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -44,13 +46,12 @@ public class LeadService {
 
   // Find All Leads
 
-  public List<LeadDto> findAllLeads(Pageable pageable){
+  public Page<LeadDto> findAllLeads(Pageable pageable){
 
     return leadRepository.findAll(pageable)
-        .stream()
         .map(
             LeadDto::fromEntity
-        ).toList();
+        );
 
   }
 

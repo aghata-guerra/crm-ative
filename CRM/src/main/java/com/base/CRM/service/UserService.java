@@ -26,7 +26,7 @@ public class UserService implements UserDetailsService {
   }
   
   
-  public UserDto createService(UserCreateDto userCreateDto){
+  public UserDto createUser(UserCreateDto userCreateDto){
     
     if(userRepository.findByEmail(userCreateDto.email()).isPresent()){
       throw new UserAlreadyRegistered();

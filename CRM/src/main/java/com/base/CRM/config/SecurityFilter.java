@@ -1,5 +1,6 @@
 package com.base.CRM.config;
 
+import com.base.CRM.service.JwtService;
 import com.base.CRM.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

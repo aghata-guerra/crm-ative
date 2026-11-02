@@ -1,4 +1,4 @@
-packagee com.base.CRM.entity.dto;
+package com.base.CRM.entity.dto;
 
 public record LoginResponseDto(
     String acessToken,

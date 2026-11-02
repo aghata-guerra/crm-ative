@@ -5,8 +5,11 @@ import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.User;
 import com.base.CRM.entity.dto.DiagnosticoCreateDto;
 import com.base.CRM.entity.dto.DiagnosticoDto;
+import com.base.CRM.entity.dto.NegociacaoDto;
 import com.base.CRM.exception.DiagnosticoNotFoundException;
 import com.base.CRM.repository.DiagnosticoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,7 +57,13 @@ public class DiagnosticoService {
                 diagnosticoRepository.save(diagnostico)
         );
 
+    }
 
+    public Page<DiagnosticoDto> findAllDiagnostico(Pageable pageable){
+
+        return diagnosticoRepository.findAll(pageable).map(
+                DiagnosticoDto::fromEntity
+        );
     }
 
 

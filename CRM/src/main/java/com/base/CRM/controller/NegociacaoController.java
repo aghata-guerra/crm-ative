@@ -1,5 +1,6 @@
 package com.base.CRM.controller;
 
+import com.base.CRM.entity.User;
 import com.base.CRM.entity.dto.LossReasonRequest;
 import com.base.CRM.entity.dto.NegociacaoCreateDto;
 import com.base.CRM.entity.dto.NegociacaoDto;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,9 +50,18 @@ public class NegociacaoController {
         return negociacaoService.findAllNegociacao(pageable);
     }
 
+
+    // Apenas para Gestores
     @GetMapping("/user/{id}")
     public List<NegociacaoDto> getAllNegociacaoByUserId(@PathVariable Long id){
         return negociacaoService.findAllNegociacaoByUserId(id);
+    }
+
+    @GetMapping("/user")
+    public List<NegociacaoDto> getAllNegociacaoByAuthUser(
+            @AuthenticationPrincipal User user
+    ){
+        return negociacaoService.findAllNegociacaoByUserId(user.getId());
     }
 
     @GetMapping("/lead/{id}")

@@ -1,9 +1,11 @@
 package com.base.CRM.service;
 
+import com.base.CRM.entity.Atividade;
 import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.User;
 import com.base.CRM.entity.dto.AtividadeCreateDto;
 import com.base.CRM.entity.dto.AtividadeDto;
+import com.base.CRM.exception.AtividadeNotFoundException;
 import com.base.CRM.exception.NegociacaoNotFoundException;
 import com.base.CRM.repository.AtividadeRepository;
 import com.base.CRM.repository.NegociacaoRepository;
@@ -31,6 +33,13 @@ public class AtividadeService {
 
     return AtividadeDto.fromEntity(atividadeRepository.save(atividadeCreateDto.toEntity(negociacao, user)));
 
+  }
+
+  public AtividadeDto findAtividadeById(Long atividadeId) {
+    Atividade atividade = atividadeRepository.findById(atividadeId)
+            .orElseThrow(AtividadeNotFoundException::new);
+
+    return AtividadeDto.fromEntity(atividade);
   }
 
   public List<AtividadeDto> findAllAtividadesByNegociacaoId(Long negociacaoId){

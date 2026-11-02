@@ -24,7 +24,7 @@ public class Atividade {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "atividadeId")
+  @JoinColumn(name = "negociacaoId")
   private Negociacao negociacao;
 
   @ManyToOne

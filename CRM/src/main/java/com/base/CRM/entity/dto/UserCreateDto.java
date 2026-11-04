@@ -1,3 +1,4 @@
+
 package com.base.CRM.entity.dto;
 
 import com.base.CRM.entity.User;
@@ -6,20 +7,17 @@ import com.base.CRM.enumClass.Profile;
 public record UserCreateDto(
     String name,
     String email,
-    String password,
-    Profile profile, // MUDAR ANTES DE SUBIR O PROGRAMA, SOMENTE PARA TESTES
-    Boolean active
+    String password
 ) {
-  
-  public User toEntity(String encodePassword){
-    return new User(
-        null,
-        name,
-        email,
-        encodePassword,
-        profile,
-        active
-    );
-  }
-  
+
+    public User toEntity(String encodedPassword) {
+        return new User(
+            null,
+            name,
+            email,
+            encodedPassword,
+            Profile.VENDEDOR,
+            true
+        );
+    }
 }

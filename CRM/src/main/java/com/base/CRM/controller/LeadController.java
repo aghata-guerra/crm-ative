@@ -5,6 +5,7 @@ import com.base.CRM.entity.dto.LeadCreateDto;
 import com.base.CRM.entity.dto.LeadDto;
 import com.base.CRM.service.LeadService;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -51,7 +52,7 @@ public class LeadController {
     // Cadastrar novo lead
     @PostMapping
     public ResponseEntity<LeadDto> createLead(
-            @RequestBody LeadCreateDto createDto
+            @RequestBody @Valid LeadCreateDto createDto
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)

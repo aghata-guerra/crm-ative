@@ -100,30 +100,53 @@ public class NegociacaoService {
 
   }
 
-  public List<NegociacaoDto> getAllNegociacaoByEtapa(Etapa stage){
-
-    return negociacaoRepository.findByStage(stage)
-        .stream()
-        .map(NegociacaoDto::fromEntity)
-        .toList();
-
+  public Page<NegociacaoDto> findAllNegociacaoByEtapaAndStatusNegociacao(Etapa etapa, StatusNegociacao statusNegociacao, Pageable page) {
+    return negociacaoRepository.findByFilters(etapa, statusNegociacao, page)
+        .map(NegociacaoDto::fromEntity);
   }
 
-  public List<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatus
-      (Integer daysOnHold, StatusNegociacao status){
+  public Page<NegociacaoDto> findAllNegociacaoByEtapaAndStatusNegociacaoAndUserId(Etapa etapa, StatusNegociacao statusNegociacao, Long userId, Pageable page) {
+    return negociacaoRepository.findByFiltersAndResponsavel(userId, etapa, statusNegociacao, page)
+        .map(NegociacaoDto::fromEntity);
+  }
+
+  public Page<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatus
+      (Integer daysOnHold, StatusNegociacao status, Pageable pageable){
 
     LocalDate deadLine = LocalDate.now().minusDays(daysOnHold);
 
-    return negociacaoRepository.findByUpdatedStageDateBeforeAndStatusNegociacao(deadLine, status)
+    return negociacaoRepository.findByUpdatedStageDateBeforeAndStatusNegociacao(deadLine, status, pageable)
+        .map(
+            NegociacaoDto::fromEntity
+        );
+
+  }
+
+  public Page<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatusAndUserId
+      (Integer daysOnHold, StatusNegociacao status, Long userId, Pageable pageable){
+
+    LocalDate deadLine = LocalDate.now().minusDays(daysOnHold);
+
+    return negociacaoRepository.findByUpdatedStageDateBeforeAndStatusNegociacaoAndUser_Id(deadLine, status, userId, pageable)
+        .map(
+            NegociacaoDto::fromEntity
+        );
+
+  }
+
+  public List<NegociacaoDto> findAllNegociacaoWithoutProximoPasso(){
+
+    return negociacaoRepository.findByProximoPassoIsEmpty()
         .stream()
         .map(
             NegociacaoDto::fromEntity
         )
         .toList();
-
   }
 
-  public List<NegociacaoDto> findAllNegociacaoWithoutProximoPasso(){
+  public List<NegociacaoDto> findAllNegociacaoWithoutProximoPassoAndUserId(
+      Long userId
+  ){
 
     return negociacaoRepository.findByProximoPassoIsEmpty()
         .stream()

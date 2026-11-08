@@ -27,7 +27,7 @@ public record LeadCreateDto(
 
     return new Lead(
         null,
-        name,
+        name.trim(),
         email,
         telephone,
         position,

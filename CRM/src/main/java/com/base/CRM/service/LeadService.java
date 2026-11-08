@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LeadService {
@@ -27,15 +28,16 @@ public class LeadService {
   }
 
   // Create lead
-
+  
+  @Transactional
   public LeadDto createLead(LeadCreateDto lead){
 
-    Optional<Lead> holderLead = leadRepository.findByEmail(lead.email());
+    Optional<Lead> holderLead = consultIfLeadsRegistered(lead);
 
     if(holderLead.isPresent()){
       throw new LeadAlreadyExistsException("Email já cadastrado no sistema!", holderLead.get().getId());
     }
-
+    
     Empresa holder = empresaService.findEmpresaById(lead.empresaId());
 
     return LeadDto.fromEntity(
@@ -60,6 +62,30 @@ public class LeadService {
   public Lead findLeadById(Long id){
     return leadRepository.findById(id).orElseThrow(LeadNotFoundException::new);
   }
+  
+  // Find Lead by email
+  
+  public LeadDto findLeadByEmail(String email){
+    
+    email = email.trim().toLowerCase();
+    
+    return LeadDto.fromEntity(leadRepository.findByEmail(email).orElseThrow(LeadNotFoundException::new));
+    
+  }
+  
+  // Find Lead by Name
+  
+  public List<LeadDto> findLeadByName(String name){
+    
+    String normalizedName = name.trim().toLowerCase();
+    
+    return leadRepository.findByNameContainingIgnoreCase(name)
+        .stream()
+        .map(LeadDto::fromEntity)
+        .toList();
+    
+  }
+  
 
   // Find All Leads by Empresa Id
 
@@ -70,6 +96,20 @@ public class LeadService {
         .map(
             LeadDto::fromEntity
         ).toList();
+
+  }
+  
+  private Optional<Lead> consultIfLeadsRegistered(LeadCreateDto leadCreateDto){
+
+    Optional<Lead> holderLead = leadRepository.findByEmail(leadCreateDto.email().toLowerCase().trim());
+
+    if(holderLead.isPresent()){
+      return holderLead;
+    }
+        
+    holderLead = leadRepository.findByTelephone(leadCreateDto.telephone().trim());
+
+    return holderLead;
 
   }
 

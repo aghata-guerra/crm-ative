@@ -29,7 +29,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
+        <!-- Biblioteca OpenCSV -->
+        <dependency>
+          <groupId>com.opencsv</groupId>
+          <artifactId>opencsv</artifactId>
+          <version>5.8</version>
+        </dependency>
         <!-- Autenticacao JWT -->
         <dependency>
             <groupId>com.auth0</groupId>

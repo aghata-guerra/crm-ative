@@ -8,11 +8,10 @@ import com.base.CRM.entity.dto.NegociacoesPorOrigemDto;
 import com.base.CRM.enumClass.Etapa;
 import com.base.CRM.enumClass.StatusNegociacao;
 import com.base.CRM.service.NegociacaoService;
-import org.apache.coyote.Response;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,7 @@ public class NegociacaoController {
 
     @PostMapping
     public ResponseEntity<NegociacaoDto> createNegociacao(
-            @RequestBody NegociacaoCreateDto negociacaoCreateDto
+            @RequestBody @Valid NegociacaoCreateDto negociacaoCreateDto
             ){
 
         return ResponseEntity.ok(
@@ -39,13 +38,13 @@ public class NegociacaoController {
     }
 
     @GetMapping("/{id}")
-    public NegociacaoDto getNegociacaoById(@PathVariable Long id){
-        return NegociacaoDto.fromEntity(negociacaoService.findNegociacaoById(id));
+    public ResponseEntity<NegociacaoDto> getNegociacaoById(@PathVariable Long id){
+        return ResponseEntity.ok(NegociacaoDto.fromEntity(negociacaoService.findNegociacaoById(id)));
     }
 
     @GetMapping
     public Page<NegociacaoDto> getAllNegociacao(
-            @PageableDefault(page = 0, size = 10, sort = "companyName") Pageable pageable
+            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable
     ) {
         return negociacaoService.findAllNegociacao(pageable);
     }
@@ -92,30 +91,61 @@ public class NegociacaoController {
     }
 
 
-    @GetMapping("/etapa")
-    public ResponseEntity<List<NegociacaoDto>> getAllNegociacaoByEtapa(
-            @RequestParam Etapa stage) {
+    @GetMapping("/filter")
+    public Page<NegociacaoDto> getAllNegociacaoByEtapa(
+        @RequestParam(required = false) Etapa stage,
+        @RequestParam(required = false) StatusNegociacao statusNegociacao,
+        @AuthenticationPrincipal User user,
+        @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 
-        return ResponseEntity.ok(
-                negociacaoService.getAllNegociacaoByEtapa(stage)
-        );
+        return negociacaoService.findAllNegociacaoByEtapaAndStatusNegociacao(stage, statusNegociacao, pageable);
+        
+    }
+
+    @GetMapping("/filter/me")
+    public Page<NegociacaoDto> findAllNegociacaoByEtapaAndStatusNegociacaoAndUserId(
+        @RequestParam(required = false) Etapa stage,
+        @RequestParam(required = false) StatusNegociacao statusNegociacao,
+        @AuthenticationPrincipal User user,
+        @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable
+        ) {
+  
+      return negociacaoService.findAllNegociacaoByEtapaAndStatusNegociacaoAndUserId(stage, statusNegociacao, user.getId(), pageable);
     }
 
     @GetMapping("/prazo")
-    public ResponseEntity<List<NegociacaoDto>> findAllNegociacaoWithDeadLineAndByStatus(
+    public Page<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatus(
             @RequestParam Integer daysOnHold,
-            @RequestParam StatusNegociacao status) {
+            @RequestParam StatusNegociacao status,
+            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 
-        return ResponseEntity.ok(
-                negociacaoService.findAllNegociacaoWithDeadLineAndByStatus(daysOnHold, status)
-        );
+        return negociacaoService.findAllNegociacaoWithDeadLineAndByStatus(daysOnHold, status, pageable);
+    }
+
+    @GetMapping("/prazo/me")
+    public Page<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatusAndUserId(
+        @RequestParam Integer daysOnHold,
+        @RequestParam StatusNegociacao status,
+        @AuthenticationPrincipal User user,
+        @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
+  
+      return negociacaoService.findAllNegociacaoWithDeadLineAndByStatusAndUserId(daysOnHold, status, user.getId(), pageable);
     }
 
     @GetMapping("/sem-proximo-passo")
-    public ResponseEntity<List<NegociacaoDto>> findAllNegociacaoWithoutProximoPasso(){
+    public ResponseEntity<List<NegociacaoDto>> getAllNegociacaoWithoutProximoPasso(){
         return ResponseEntity.ok(
                 negociacaoService.findAllNegociacaoWithoutProximoPasso()
         );
+    }
+
+    @GetMapping("/sem-proximo-passo/me")
+    public ResponseEntity<List<NegociacaoDto>> getAllNegociacaoWithoutProximoPassoAndUserId(
+        @AuthenticationPrincipal User user
+    ){
+      return ResponseEntity.ok(
+          negociacaoService.findAllNegociacaoWithoutProximoPassoAndUserId(user.getId())
+      );
     }
 
     @PatchMapping("/{negociacaoId}/finalizar/ganha")
@@ -126,16 +156,7 @@ public class NegociacaoController {
                 negociacaoService.finishNegociacaoAsGain(negociacaoId)
         );
     }
-
-    @PatchMapping("/{negociacaoId}/finalizar/perca")
-    public ResponseEntity<NegociacaoDto> finishNegociacaoAsLoss(
-            @PathVariable Long negociacaoId) {
-
-        return ResponseEntity.ok(
-                negociacaoService.finishNegociacaoAsGain(negociacaoId)
-        );
-    }
-
+    
     @PatchMapping("/{negociacaoId}/finalizar/perda")
     public ResponseEntity<NegociacaoDto> finishNegociacaoAsLoss(
             @PathVariable Long negociacaoId,

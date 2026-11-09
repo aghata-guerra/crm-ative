@@ -89,6 +89,15 @@ public class NegociacaoController {
                 negociacaoService.updateStageNegociacao(negociacaoId, etapa)
         );
     }
+    
+    @PatchMapping("/{negociacaoId}/nextstage")
+    public ResponseEntity<NegociacaoDto> nextStageUpdate(
+        @PathVariable Long negociacaoId
+    ) {
+      return ResponseEntity.ok(
+          negociacaoService.nextStageUpdate(negociacaoId)
+      );
+    }
 
 
     @GetMapping("/filter")
@@ -115,7 +124,7 @@ public class NegociacaoController {
 
     @GetMapping("/prazo")
     public Page<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatus(
-            @RequestParam Integer daysOnHold,
+            @RequestParam Integer daysOnHold, // definir um tempo padrão com cliente
             @RequestParam StatusNegociacao status,
             @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 
@@ -124,7 +133,7 @@ public class NegociacaoController {
 
     @GetMapping("/prazo/me")
     public Page<NegociacaoDto> findAllNegociacaoWithDeadLineAndByStatusAndUserId(
-        @RequestParam Integer daysOnHold,
+        @RequestParam Integer daysOnHold, // definir um tempo padrão com cliente
         @RequestParam StatusNegociacao status,
         @AuthenticationPrincipal User user,
         @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
@@ -133,10 +142,10 @@ public class NegociacaoController {
     }
 
     @GetMapping("/sem-proximo-passo")
-    public ResponseEntity<List<NegociacaoDto>> getAllNegociacaoWithoutProximoPasso(){
-        return ResponseEntity.ok(
-                negociacaoService.findAllNegociacaoWithoutProximoPasso()
-        );
+    public Page<NegociacaoDto> getAllNegociacaoWithoutProximoPasso(
+        @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable
+    ){
+        return negociacaoService.findAllNegociacaoWithoutProximoPassoAndEmNegociacao(pageable);
     }
 
     @GetMapping("/sem-proximo-passo/me")
@@ -160,7 +169,7 @@ public class NegociacaoController {
     @PatchMapping("/{negociacaoId}/finalizar/perda")
     public ResponseEntity<NegociacaoDto> finishNegociacaoAsLoss(
             @PathVariable Long negociacaoId,
-            @RequestBody LossReasonRequest request) {
+            @RequestBody @Valid LossReasonRequest request) {
 
         return ResponseEntity.ok(
                 negociacaoService.finishNegociacaoAsLoss(

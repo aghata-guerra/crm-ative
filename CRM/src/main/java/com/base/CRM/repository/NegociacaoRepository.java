@@ -17,18 +17,18 @@ public interface NegociacaoRepository extends JpaRepository<Negociacao, Long> {
   List<Negociacao> findByUser_Id(Long id);
 
   List<Negociacao> findByLead_Id(Long id);
-
-  List<Negociacao> findByStage(Etapa stage);
-
+  
   Page<Negociacao> findByUpdatedStageDateBeforeAndStatusNegociacao(LocalDate limit, StatusNegociacao statusNegociacao, Pageable pageable);
 
   Page<Negociacao> findByUpdatedStageDateBeforeAndStatusNegociacaoAndUser_Id(LocalDate limit, StatusNegociacao statusNegociacao, Long userId, Pageable pageable);
   
   List<Negociacao> findByProximoPassoIsEmpty();
   
+  Page<Negociacao> findByProximoPassoIsEmptyAndStatusNegociacao(StatusNegociacao statusNegociacao, Pageable pageable);
+  
   List<Negociacao> findByProximoPassoIsEmptyAndUser_Id(Long id);
   
-  List<Negociacao> findByEtapaAndStatusNegociacaoAndUser_Id(Etapa etapa, StatusNegociacao statusNegociacao, Long id);
+  List<Negociacao> findByStageAndStatusNegociacaoAndUser_Id(Etapa etapa, StatusNegociacao statusNegociacao, Long id);
 
   @Query("""
     SELECT new com.base.CRM.entity.dto.NegociacoesPorOrigemDto(
@@ -54,11 +54,11 @@ public interface NegociacaoRepository extends JpaRepository<Negociacao, Long> {
 
   @Query("""
     SELECT n FROM Negociacao n
-    WHERE n.responsavel.id = :usuarioId
+    WHERE n.user.id = :usuarioId
       AND (:stage IS NULL OR n.stage = :stage)
       AND (:status IS NULL OR n.statusNegociacao = :status)
     """)
-  Page<Negociacao> findByFiltersAndResponsavel(
+  Page<Negociacao> findByFiltersAndUser(
       @Param("usuarioId") Long usuarioId,
       @Param("stage") Etapa stage,
       @Param("status") StatusNegociacao status,

@@ -10,6 +10,7 @@ import com.base.CRM.enumClass.Etapa;
 import com.base.CRM.enumClass.StatusNegociacao;
 import com.base.CRM.exception.NegociacaoClosedException;
 import com.base.CRM.exception.NegociacaoNotFoundException;
+import com.base.CRM.exception.StageChangeException;
 import com.base.CRM.repository.NegociacaoRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NegociacaoService {
@@ -83,7 +85,9 @@ public class NegociacaoService {
     return NegociacaoDto.fromEntity(negociacaoRepository.save(negociacao));
 
   }
-
+  
+  // Só gestores podem alterar o stage
+  @Transactional
   public NegociacaoDto updateStageNegociacao(Long negociacaoId, Etapa etapa) {
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
@@ -99,6 +103,35 @@ public class NegociacaoService {
     }
 
   }
+  @Transactional
+  public NegociacaoDto nextStageUpdate(Long negociacaoId) {
+
+    Negociacao negociacao = findNegociacaoById(negociacaoId);
+
+    if(verifyIfNegociacaoIsValid(negociacao)){
+
+      switch (negociacao.getStage()) {
+        
+        case NOVO_LEAD:
+          negociacao.setStage(Etapa.QUALIFICACAO);
+          break;
+        case QUALIFICACAO:
+          negociacao.setStage(Etapa.DIAGNOSTICO);
+          break;
+        case PROPOSTA:
+          negociacao.setStage(Etapa.PROPOSTA);
+          break;
+        default:
+          throw new StageChangeException();
+      }
+      negociacao.setUpdatedStageDate(LocalDate.now());
+      return NegociacaoDto.fromEntity(negociacaoRepository.save(negociacao));
+
+    } else {
+      throw new NegociacaoClosedException();
+    }
+
+  }
 
   public Page<NegociacaoDto> findAllNegociacaoByEtapaAndStatusNegociacao(Etapa etapa, StatusNegociacao statusNegociacao, Pageable page) {
     return negociacaoRepository.findByFilters(etapa, statusNegociacao, page)
@@ -106,7 +139,7 @@ public class NegociacaoService {
   }
 
   public Page<NegociacaoDto> findAllNegociacaoByEtapaAndStatusNegociacaoAndUserId(Etapa etapa, StatusNegociacao statusNegociacao, Long userId, Pageable page) {
-    return negociacaoRepository.findByFiltersAndResponsavel(userId, etapa, statusNegociacao, page)
+    return negociacaoRepository.findByFiltersAndUser(userId, etapa, statusNegociacao, page)
         .map(NegociacaoDto::fromEntity);
   }
 
@@ -134,14 +167,14 @@ public class NegociacaoService {
 
   }
 
-  public List<NegociacaoDto> findAllNegociacaoWithoutProximoPasso(){
+  public Page<NegociacaoDto> findAllNegociacaoWithoutProximoPassoAndEmNegociacao(
+      Pageable pageable
+  ){
 
-    return negociacaoRepository.findByProximoPassoIsEmpty()
-        .stream()
+    return negociacaoRepository.findByProximoPassoIsEmptyAndStatusNegociacao(StatusNegociacao.EM_NEGOCIACAO, pageable)
         .map(
             NegociacaoDto::fromEntity
-        )
-        .toList();
+        );
   }
 
   public List<NegociacaoDto> findAllNegociacaoWithoutProximoPassoAndUserId(
@@ -155,7 +188,7 @@ public class NegociacaoService {
         )
         .toList();
   }
-
+  @Transactional
   public NegociacaoDto finishNegociacaoAsGain(Long negociacaoId){
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
@@ -163,6 +196,8 @@ public class NegociacaoService {
     if(verifyIfNegociacaoIsValid(negociacao)){
 
     negociacao.setStatus(StatusNegociacao.ENCERRADA_GANHA);
+    
+    negociacao.setFinalDate(LocalDate.now());
 
     balanceService.addBalanceEarnings(negociacao.getEstimatedCost());
 
@@ -176,7 +211,7 @@ public class NegociacaoService {
 
 
   }
-
+  @Transactional
   public NegociacaoDto finishNegociacaoAsLoss(Long negociacaoId, String lossReason){
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
@@ -184,6 +219,8 @@ public class NegociacaoService {
       if(verifyIfNegociacaoIsValid(negociacao)){
 
       negociacao.setStatus(StatusNegociacao.ENCERRADA_PERDA);
+      
+      negociacao.setFinalDate(LocalDate.now());
 
       balanceService.subtractBalanceEarnings(negociacao.getEstimatedCost().negate());
 

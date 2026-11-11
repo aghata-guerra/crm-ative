@@ -1,5 +1,7 @@
 package com.base.CRM.entity.dto;
 
+import jakarta.validation.constraints.*;
+
 import com.base.CRM.entity.Empresa;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,13 +10,13 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record EmpresaCreateDto(
     @JsonProperty("razao_social")
-    String companyName,
+    @NotBlank @Size(max=255) String companyName,
     @JsonProperty("nome_fantasia")
     String tradeName,
-    String cnpj,
+    @NotBlank @Pattern(regexp="[0-9./-]{14,18}") String cnpj,
     @JsonProperty("telefones")
     List<TelefoneCreateDto> telephones,
-    String email
+    @Email String email
 ) {
 
   public Empresa toEntity(){
@@ -27,7 +29,7 @@ public record EmpresaCreateDto(
         null,
         companyName,
         tradeName,
-        cnpj,
+        cnpj == null ? null : cnpj.replaceAll("[^0-9]", ""),
         telephoneCreate,
         email
     );

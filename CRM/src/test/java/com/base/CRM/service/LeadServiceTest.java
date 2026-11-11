@@ -52,7 +52,7 @@ class LeadServiceTest {
         () -> assertEquals("123@gmail.com", expectLead.email(), "Email do lead incorreto"),
         () -> assertEquals("1234567", expectLead.telephone(), "Telefone do lead incorreto"),
         () -> assertEquals("CEO", expectLead.position(), "Posição do Lead incorreta"),
-        () -> assertEquals(1L, expectLead.companyId(), "Id da empres do lead incorreta")
+        () -> assertEquals(1L, expectLead.empresaId(), "Id da empres do lead incorreta")
     );
 
 

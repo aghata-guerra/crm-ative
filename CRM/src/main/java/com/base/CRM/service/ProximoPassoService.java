@@ -20,6 +20,7 @@ import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class ProximoPassoService {
 
   private final ProximoPassoRepository proximoPassoRepository;
@@ -35,6 +36,7 @@ public class ProximoPassoService {
 
     Negociacao negociacaoHolder = negociacaoService.findNegociacaoById(proximoPassoCreateDto.negociacaoId());
 
+    negociacaoService.requireOpen(negociacaoHolder);
     return ProximoPassoDto.fromEntity(proximoPassoRepository.save(
       proximoPassoCreateDto.toEntity(negociacaoHolder, user)
     ));
@@ -43,7 +45,9 @@ public class ProximoPassoService {
   public ProximoPassoDto changeStatusProximoPasso(Long proximoPassoId, StatusProximoPasso statusProximoPasso){
 
     ProximoPasso proximoPasso = findProximoPassoById(proximoPassoId);
+    negociacaoService.requireOpen(proximoPasso.getNegociacao());
 
+    if (statusProximoPasso == null) throw new IllegalArgumentException("Informe um status válido.");
     if(proximoPasso.getStatusProximoPasso() == StatusProximoPasso.REALIZADA){
       throw new StatusProximoPassoCantReturnException();
     }
@@ -62,9 +66,10 @@ public class ProximoPassoService {
 
   public ProximoPasso findProximoPassoById(Long proximoPassoId){
 
-    return proximoPassoRepository.findById(proximoPassoId).orElseThrow(
-        ProximoPassoNotFoundException::new
-    );
+    ProximoPasso step = proximoPassoRepository.findById(proximoPassoId)
+        .orElseThrow(ProximoPassoNotFoundException::new);
+    negociacaoService.findNegociacaoById(step.getNegociacao().getId());
+    return step;
 
   }
 
@@ -80,13 +85,17 @@ public class ProximoPassoService {
   }
 
   public List<ProximoPassoDto> findByExpectedDateBetweenAndStatus(LocalDate startDate, LocalDate endDate, StatusProximoPasso statusProximoPasso){
-    return proximoPassoRepository.findByExpectedDateBetweenAndStatus(startDate, endDate, statusProximoPasso)
-        .stream()
-        .map(ProximoPassoDto::fromEntity)
-        .toList();
+    com.base.CRM.config.CrmAccess.requireManager();
+    if (startDate == null || endDate == null || endDate.isBefore(startDate) || statusProximoPasso == null) {
+      throw new IllegalArgumentException("Confira o período e o status informados.");
+    }
+    return proximoPassoRepository.findByExpectedDateBetween(startDate, endDate)
+        .stream().map(ProximoPassoDto::fromEntity)
+        .filter(step -> step.statusProximoPasso() == statusProximoPasso).toList();
   }
 
   public List<ProximoPassoDto> findByProximoPassoByUserId(Long userId){
+    com.base.CRM.config.CrmAccess.requireUser(userId);
     return proximoPassoRepository.findByUserId(userId)
         .stream()
         .map(ProximoPassoDto::fromEntity)
@@ -96,6 +105,7 @@ public class ProximoPassoService {
   public ProximoPassoDto alterDateNextContact(LocalDate nextContact, Long proximoPassoId){
 
     ProximoPasso proximoPasso = findProximoPassoById(proximoPassoId);
+    negociacaoService.requireOpen(proximoPasso.getNegociacao());
 
     if(verifyIfProximoPassoIsValid(proximoPasso)){
 
@@ -103,7 +113,7 @@ public class ProximoPassoService {
         throw new ProximoPassoAlreadyConcludeException();
       }
 
-      if(nextContact.isBefore(LocalDate.now())){
+      if(nextContact == null || nextContact.isBefore(LocalDate.now())){
         throw new NextContactDateCantBeAfterTodayException();
       }
 

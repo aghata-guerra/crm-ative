@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +34,17 @@ public class AuthController {
     this.userService = userService;
   }
 
+  @GetMapping("/me")
+  public UserDto me(@AuthenticationPrincipal User user) {
+    return UserDto.fromEntity(user);
+  }
+
   @PostMapping("/login")
-  public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
+  public ResponseEntity<LoginResponseDto> login(@jakarta.validation.Valid @RequestBody LoginRequestDto loginRequestDto){
 
     Authentication authentication = authenticationManager.authenticate(
         UsernamePasswordAuthenticationToken.unauthenticated(
-            loginRequestDto.email(),
+            loginRequestDto.email().trim().toLowerCase(java.util.Locale.ROOT),
             loginRequestDto.password()
         )
     );
@@ -59,7 +66,7 @@ public class AuthController {
   }
   
   @PostMapping("/register")
-  public ResponseEntity<UserDto> register(@RequestBody UserCreateDto userCreateDto){
+  public ResponseEntity<UserDto> register(@jakarta.validation.Valid @RequestBody UserCreateDto userCreateDto){
     
     return ResponseEntity
         .status(HttpStatus.CREATED)

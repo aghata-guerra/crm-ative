@@ -1,6 +1,9 @@
 package com.base.CRM.entity;
 
+import com.base.CRM.enumClass.Origin;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +34,9 @@ public class Lead {
 
   private String position;
 
+  @Enumerated(EnumType.STRING)
+  private Origin origin;
+
   @Column(nullable = false, updatable = false)
   private final LocalDateTime createdAt = LocalDateTime.now();
 
@@ -51,6 +57,14 @@ public class Lead {
     this.telephone = telephone;
     this.position = position;
     this.company = company;
+  }
+
+  public Origin getOrigin() {
+    return origin == null ? Origin.DESCONHECIDA : origin;
+  }
+
+  public void setOrigin(Origin origin) {
+    this.origin = origin;
   }
 
   public Long getId() {

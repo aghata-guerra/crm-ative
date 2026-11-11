@@ -1,180 +1,173 @@
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { list, request } from './api';
+import { ActionForm, ErrorMessage, Field } from './components';
+import { Agenda } from './agenda';
+import { Empresas, Leads } from './cadastros';
+import { Indicadores } from './indicadores';
+import { Funil, Oportunidade } from './oportunidades';
+import './App.css';
 
-function App() {
-  // Estado com a lista inicial de leads
-  const [leads, setLeads] = useState([
-    { id: 1, nome: 'Empresa Alpha', origem: 'Indicação', status: 'Em Negociação', responsavel: 'Thales' },
-    { id: 2, nome: 'Comércio Beta', origem: 'Redes Sociais', status: 'Proposta Enviada', responsavel: 'Aghata' },
-    { id: 3, nome: 'Serviços Gamma', origem: 'Site', status: 'Novo Lead', responsavel: 'Inadilson' },
-  ]);
+const pages = [
+  { key: 'Funil', label: 'Funil comercial', icon: '◫' },
+  { key: 'Agenda', label: 'Próximos passos', icon: '▣' },
+  { key: 'Indicadores', label: 'Indicadores', icon: '▥' },
+  { key: 'Empresas', label: 'Empresas', icon: '▤', group: 'Cadastros' },
+  { key: 'Leads', label: 'Leads e contatos', icon: '◉' },
+];
+const headings = {
+  Funil: ['VISÃO COMERCIAL', 'Funil de oportunidades', 'Acompanhe cada negócio, do primeiro contato à decisão.'],
+  Agenda: ['AGENDA COMERCIAL', 'Próximos passos', 'Priorize pendências e mantenha cada oportunidade com uma próxima ação.'],
+  Indicadores: ['RESULTADOS COMERCIAIS', 'Indicadores comerciais', 'Acompanhe os resultados e confira os registros de cada indicador.'],
+  Empresas: ['CADASTROS', 'Empresas', 'Centralize as informações das empresas atendidas pela equipe.'],
+  Leads: ['CADASTROS', 'Leads e contatos', 'Organize seus contatos e registre a origem de cada oportunidade.'],
+};
+const sessionKey = 'ative-crm-token';
 
-  // Estados para controlar o formulário de novo lead
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [novoNome, setNovoNome] = useState('');
-  const [novaOrigem, setNovaOrigem] = useState('Site');
-  const [novoResponsavel, setNovoResponsavel] = useState('');
-
-  // Função para adicionar um novo lead na lista
-  const adicionarLead = (e) => {
-    e.preventDefault();
-    if (!novoNome.trim() || !novoResponsavel.trim()) return;
-
-    const novoLeadObj = {
-      id: leads.length + 1,
-      nome: novoNome,
-      origem: novaOrigem,
-      status: 'Novo Lead',
-      responsavel: novoResponsavel,
-    };
-
-    setLeads([...leads, novoLeadObj]);
-    setNovoNome('');
-    setNovoResponsavel('');
-    setMostrarModal(false); // Fecha o modal após salvar
-  };
-
-  return (
-    <div style={{ fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', backgroundColor: '#f8f9fa', minHeight: '100vh', margin: 0 }}>
-      
-      {/* Cabeçalho / Navbar estilo Ative (Fundo Escuro) */}
-      <header style={{ backgroundColor: '#111111', color: 'white', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white' }}>
-            á<span style={{ color: '#22c55e' }}>tive</span>.
-          </span>
-          <span style={{ fontSize: '0.85rem', color: '#888', borderLeft: '1px solid #444', paddingLeft: '10px' }}>CRM Comercial</span>
-        </div>
-        <nav style={{ display: 'flex', gap: '25px', fontSize: '0.95rem' }}>
-          <span style={{ color: '#22c55e', fontWeight: '600', cursor: 'pointer' }}>Início</span>
-          <span style={{ color: '#ccc', cursor: 'pointer' }}>Leads</span>
-          <span style={{ color: '#ccc', cursor: 'pointer' }}>Funil de Vendas</span>
-          <span style={{ color: '#ccc', cursor: 'pointer' }}>Relatórios</span>
-        </nav>
-      </header>
-
-      {/* Banner Superior Estilo Ative */}
-      <section style={{ backgroundColor: '#18181b', color: 'white', padding: '50px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ maxWidth: '600px' }}>
-          <h1 style={{ fontSize: '2.5rem', margin: '0 0 15px 0', lineHeight: '1.2' }}>
-            Tenha os leads da sua <span style={{ color: '#22c55e' }}>empresa organizados</span> e feche mais negócios.
-          </h1>
-          <p style={{ color: '#a1a1aa', fontSize: '1.1rem', marginBottom: '25px' }}>
-            Centralize suas oportunidades, acompanhe o funil de vendas e potencialize sua conversão mensal.
-          </p>
-          <button 
-            onClick={() => setMostrarModal(true)}
-            style={{ backgroundColor: '#22c55e', color: '#000', border: 'none', padding: '12px 25px', borderRadius: '25px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}
-          >
-            + Novo Lead
-          </button>
-        </div>
-        <div style={{ backgroundColor: '#27272a', padding: '20px', borderRadius: '12px', border: '1px solid #3f3f46', width: '350px' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: '#22c55e' }}>Resumo do Mês (Squad 53)</h3>
-          <p style={{ margin: '5px 0', color: '#d4d4d8', fontSize: '0.9rem' }}>Meta de Leads: <strong>200 / mês</strong></p>
-          <p style={{ margin: '5px 0', color: '#d4d4d8', fontSize: '0.9rem' }}>Leads Atuais: <strong>{leads.length} cadastrados</strong></p>
-        </div>
-      </section>
-
-      {/* Modal / Formulário para Adicionar Lead */}
-      {mostrarModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', width: '400px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
-            <h3 style={{ margin: '0 0 20px 0', color: '#18181b' }}>Cadastrar Novo Lead</h3>
-            
-            <form onSubmit={adicionarLead} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px', color: '#52525b' }}>Nome da Empresa / Cliente</label>
-                <input 
-                  type="text" 
-                  value={novoNome} 
-                  onChange={(e) => setNovoNome(e.target.value)} 
-                  placeholder="Ex: Empresa Delta"
-                  required
-                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d4d4d8', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px', color: '#52525b' }}>Origem do Lead</label>
-                <select 
-                  value={novaOrigem} 
-                  onChange={(e) => setNovaOrigem(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d4d4d8', boxSizing: 'border-box' }}
-                >
-                  <option value="Site">Site</option>
-                  <option value="WhatsApp">WhatsApp</option>
-                  <option value="Indicação">Indicação</option>
-                  <option value="Redes Sociais">Redes Sociais</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px', color: '#52525b' }}>Responsável Comercial</label>
-                <input 
-                  type="text" 
-                  value={novoResponsavel} 
-                  onChange={(e) => setNovoResponsavel(e.target.value)} 
-                  placeholder="Ex: Thales / Aghata"
-                  required
-                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d4d4d8', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button 
-                  type="submit" 
-                  style={{ flex: 1, backgroundColor: '#22c55e', color: '#000', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  Salvar Lead
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => setMostrarModal(false)}
-                  style={{ flex: 1, backgroundColor: '#e4e4e7', color: '#3f3f46', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Tabela de Leads / Conteúdo Principal */}
-      <main style={{ padding: '40px' }}>
-        <section style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-          <h2 style={{ margin: '0 0 20px 0', fontSize: '1.3rem', color: '#18181b' }}>Gestão de Oportunidades ({leads.length})</h2>
-          
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f4f4f5', color: '#52525b', fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                <th style={{ padding: '15px' }}>ID</th>
-                <th style={{ padding: '15px' }}>Cliente / Empresa</th>
-                <th style={{ padding: '15px' }}>Origem</th>
-                <th style={{ padding: '15px' }}>Status</th>
-                <th style={{ padding: '15px' }}>Responsável</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.map((lead) => (
-                <tr key={lead.id} style={{ borderBottom: '1px solid #e4e4e7', fontSize: '0.95rem' }}>
-                  <td style={{ padding: '15px', color: '#71717a' }}>#{lead.id}</td>
-                  <td style={{ padding: '15px', fontWeight: '600', color: '#18181b' }}>{lead.nome}</td>
-                  <td style={{ padding: '15px', color: '#52525b' }}>{lead.origem}</td>
-                  <td style={{ padding: '15px' }}>
-                    <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>
-                      {lead.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '15px', color: '#52525b' }}>{lead.responsavel}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      </main>
-    </div>
-  );
+function Access({ onLogin, expired }) {
+  const [register, setRegister] = useState(false);
+  const [notice, setNotice] = useState('');
+  async function submit(body) {
+    body.email = body.email.trim().toLowerCase();
+    if (register) {
+      body.name = body.name.trim();
+      if (!body.name) throw new Error('Informe o nome completo.');
+      await request('/auth/register', { method: 'POST', body });
+      setRegister(false);
+      setNotice('Conta criada. Entre com seu e-mail e senha.');
+    } else {
+      const result = await request('/auth/login', { method: 'POST', body });
+      onLogin(result.acessToken);
+    }
+  }
+  return <main className="access">
+    <section className="panel">
+      <p className="brand">ative<span>.</span></p>
+      <h1>{register ? 'Criar conta' : 'Entrar no CRM'}</h1>
+      {(notice || expired) && <p role="status">{notice || expired}</p>}
+      <ActionForm key={String(register)} action={submit} label={register ? 'Criar conta' : 'Entrar'}>
+        {register && <Field label="Nome completo" name="name" autoComplete="name" maxLength={100} />}
+        <Field label="E-mail" name="email" type="email" autoComplete="email" />
+        <Field label="Senha" name="password" type="password" autoComplete={register ? 'new-password' : 'current-password'} minLength={register ? 8 : undefined} />
+      </ActionForm>
+      <button type="button" className="secondary" onClick={() => { setRegister(!register); setNotice(''); }}>
+        {register ? 'Voltar para o login' : 'Criar uma conta'}
+      </button>
+    </section>
+  </main>;
 }
 
-export default App;
+function Workspace({ api, logout }) {
+  const [page, setPage] = useState('Funil');
+  const [stalledDays, setStalledDays] = useState(7);
+  function openOpportunity(id) {
+    setSelected(id);
+  }
+  const [selected, setSelected] = useState(null);
+  const [data, setData] = useState(null);
+  const [version, setVersion] = useState(0);
+  const [error, setError] = useState('');
+  const refresh = () => setVersion(previous => previous + 1);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    async function load() {
+      setError('');
+      try {
+        const user = await api('/auth/me', { signal });
+        const [empresas, leads, oportunidades] = await Promise.all([
+          list(api, '/empresa', signal),
+          list(api, '/lead', signal),
+          user.profile === 'GESTOR' ? list(api, '/negociacao', signal) : api('/negociacao/user', { signal }),
+        ]);
+        if (!signal.aborted) setData({ user, empresas, leads, oportunidades });
+      } catch (failure) {
+        if (!signal.aborted) setError(failure.message);
+      }
+    }
+    load();
+    return () => controller.abort();
+  }, [api, version]);
+
+  async function save(path, body, method = 'POST', reload = true) {
+    const response = await api(path, { method, body });
+    if (reload) refresh();
+    return response;
+  }
+
+  const opportunity = data?.oportunidades.find(item => item.id === selected);
+  const [eyebrow, title, description] = headings[page];
+  const initials = (data?.user.name || '').split(/\s+/).filter(Boolean).map(part => part[0]).slice(0, 2).join('');
+  return <div className="app-shell">
+    <aside className="sidebar">
+      <div className="sidebar-brand"><span className="brand-mark">A</span><span className="brand">ative</span><small>CRM</small></div>
+      <nav aria-label="Navegação principal">
+        <p className="nav-group">Principal</p>
+        {pages.map(item => <div key={item.key}>
+          {item.group && <p className="nav-group">{item.group}</p>}
+          <button aria-current={item.key === page ? 'page' : undefined}
+            onClick={() => { setPage(item.key); setSelected(null); }}>
+            <span aria-hidden="true" className="nav-icon">{item.icon}</span>{item.label}
+          </button>
+        </div>)}
+      </nav>
+      <div className="sidebar-footer"><strong>Gestão comercial</strong>
+        <span>{data?.user.profile === 'GESTOR' ? 'Visão da equipe' : 'Sua carteira de oportunidades'}</span>
+      </div>
+    </aside>
+    <div className="app-main">
+      <header className="top">
+        <p className="breadcrumb">Comercial <span>/</span> <strong>{pages.find(item => item.key === page).label}</strong></p>
+        <div className="account">
+          <span className="account-name">{data?.user.name}<small>{data?.user.profile === 'GESTOR' ? 'Gestor · equipe' : 'Vendedor · minha carteira'}</small></span>
+          <span className="avatar" aria-hidden="true">{initials || '·'}</span>
+          <button className="logout" onClick={logout}>Sair</button>
+        </div>
+      </header>
+      <main className="workspace">
+        <div className="page-heading">
+          <div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="page-description">{description}</p></div>
+          <div className="heading-actions">
+            <button className="secondary refresh-button" onClick={refresh} aria-label="Atualizar dados" title="Atualizar dados">↻</button>
+            {['Funil', 'Agenda'].includes(page) && <button onClick={() => setPage('Leads')}>+ Novo lead</button>}
+          </div>
+        </div>
+        <ErrorMessage error={error} />
+        {!data && !error && <p role="status" className="loading">Carregando CRM…</p>}
+        {data && page === 'Indicadores' && <Indicadores data={data} onOpen={openOpportunity} stalledDays={stalledDays} setStalledDays={setStalledDays} />}
+        {data && page === 'Agenda' && <Agenda data={data} onOpen={openOpportunity} stalledDays={stalledDays} setStalledDays={setStalledDays} />}
+        {data && page === 'Empresas' && <Empresas empresas={data.empresas} save={save} />}
+        {data && page === 'Leads' && <Leads empresas={data.empresas} leads={data.leads} save={save} refresh={refresh} />}
+        {data && page === 'Funil' && <Funil stalledDays={stalledDays} data={data} save={save} onOpen={openOpportunity} />}
+      </main>
+    </div>
+    {opportunity && <Oportunidade key={selected} item={opportunity} data={data} stalledDays={stalledDays} save={save} onBack={() => setSelected(null)} />}
+  </div>;
+}
+
+export default function App() {
+  const [token, setToken] = useState(() => sessionStorage.getItem(sessionKey));
+  const [expired, setExpired] = useState('');
+  const endSession = useCallback((expected, message = '') => {
+    if (sessionStorage.getItem(sessionKey) !== expected) return;
+    sessionStorage.removeItem(sessionKey);
+    setToken(null);
+    setExpired(message);
+  }, []);
+  const api = useCallback(async (path, options) => {
+    try {
+      return await request(path, { ...options, token });
+    } catch (error) {
+      if (error.status === 401) endSession(token, 'Sua sessão terminou. Entre novamente.');
+      throw error;
+    }
+  }, [token, endSession]);
+  function login(value) {
+    if (!value) throw new Error('A API não retornou um token.');
+    sessionStorage.setItem(sessionKey, value);
+    setToken(value);
+    setExpired('');
+  }
+  return token ? <Workspace api={api} logout={() => endSession(token)} />
+    : <Access onLogin={login} expired={expired} />;
+}

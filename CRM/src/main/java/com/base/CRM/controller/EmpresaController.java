@@ -32,10 +32,10 @@ public class EmpresaController {
 
     @GetMapping("/{id}")
     public EmpresaDto getEmpresaById(@PathVariable Long id){
-        return EmpresaDto.fromEntity(empresaService.findEmpresaById(id));
+        return empresaService.getEmpresa(id);
     }
 
-    @GetMapping("/{cnpj}")
+    @GetMapping("/cnpj/{cnpj}")
     public EmpresaDto getEmpresaByCnpj(@PathVariable String cnpj){
         return empresaService.findEmpresaByCnpj(cnpj);
     }
@@ -48,7 +48,7 @@ public class EmpresaController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<EmpresaDto> createEmpresaManual(@RequestBody EmpresaCreateDto createDto){
+    public ResponseEntity<EmpresaDto> createEmpresaManual(@jakarta.validation.Valid @RequestBody EmpresaCreateDto createDto){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(empresaService.createEmpresaManual(createDto));

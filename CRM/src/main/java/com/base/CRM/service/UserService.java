@@ -28,6 +28,8 @@ public class UserService implements UserDetailsService {
   
   public UserDto createUser(UserCreateDto userCreateDto){
     
+    userCreateDto = new UserCreateDto(userCreateDto.name().trim(),
+        userCreateDto.email().trim().toLowerCase(java.util.Locale.ROOT), userCreateDto.password());
     if(userRepository.findByEmail(userCreateDto.email()).isPresent()){
       throw new UserAlreadyRegistered();
     }
@@ -49,6 +51,7 @@ public class UserService implements UserDetailsService {
 
   // Get All Users
 
+  @org.springframework.security.access.prepost.PreAuthorize("hasRole('GESTOR')")
   public List<UserDto> findAllUsers(Pageable pageable){
     return userRepository.findAll(pageable)
         .stream()
@@ -59,6 +62,7 @@ public class UserService implements UserDetailsService {
 
   // Delete User By Id
 
+  @org.springframework.security.access.prepost.PreAuthorize("hasRole('GESTOR')")
   public UserDto deleteUserById(Long userId){
     User user = findUserById(userId);
     user.setActive(false);
@@ -67,7 +71,7 @@ public class UserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    return userRepository.findByEmail(username).orElseThrow(UserNotFoundException::new);
+    return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Credenciais inválidas."));
   }
 
 }

@@ -1,7 +1,10 @@
+
 package com.base.CRM.config;
 
 import com.base.CRM.service.UserService;
+
 import java.util.List;
+
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +13,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,97 +25,118 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
-  @Bean
-  public AuthenticationManager authenticationManager(
-      AuthenticationProvider authenticationProvider
-  ) {
-    return new ProviderManager(authenticationProvider);
-  }
-  
-  @Bean
-  public AuthenticationProvider authenticationProvider(UserService userService){
-    DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userService);
-    authenticationProvider.setPasswordEncoder(passwordEncoder());
-    return authenticationProvider;
-  }
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationProvider authenticationProvider
+    ) {
+        return new ProviderManager(authenticationProvider);
+    }
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityFilter securityFilter){
-    http
-        .cors(Customizer.withDefaults())
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(
-            session -> session.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS
+    @Bean
+    public AuthenticationProvider authenticationProvider(
+            UserService userService
+    ) {
+        DaoAuthenticationProvider authenticationProvider =
+                new DaoAuthenticationProvider(userService);
+
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+
+        return authenticationProvider;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            SecurityFilter securityFilter
+    ) throws Exception {
+
+        http
+            .cors(Customizer.withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
             )
-        )
-        .authorizeHttpRequests(
-            auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated()
-        )
-        .formLogin(AbstractHttpConfigurer::disable)
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .addFilterBefore(
-            securityFilter,
-            UsernamePasswordAuthenticationFilter.class
+            .authorizeHttpRequests(
+                auth -> auth
+                    .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                    .anyRequest().authenticated()
+            )
+            .exceptionHandling(errors -> errors.authenticationEntryPoint(
+                (request, response, error) -> response.setStatus(401)))
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .addFilterBefore(
+                securityFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Origens autorizadas para acessar o backend
+        configuration.setAllowedOrigins(
+            List.of(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175"
+            )
         );
-    
-    return http.build();
-  }
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
+        // Metodos HTTP permitidos
+        configuration.setAllowedMethods(
+            List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+            )
+        );
 
-    CorsConfiguration configuration = new CorsConfiguration();
+        // Permite headers como Authorization e Content-Type
+        configuration.setAllowedHeaders(
+            List.of("*")
+        );
 
-    configuration.setAllowedOrigins(
-        List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
-    );
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
 
-    configuration.setAllowedMethods(
-        List.of(
-            "GET",
-            "POST",
-            "PUT",
-            "DELETE",
-            "OPTIONS"
-        )
-    );
+        source.registerCorsConfiguration(
+            "/**",
+            configuration
+        );
 
-    configuration.setAllowedHeaders(
-        List.of("*")
-    );
+        return source;
+    }
 
-    UrlBasedCorsConfigurationSource source =
-        new UrlBasedCorsConfigurationSource();
+    @Bean
+    public FilterRegistrationBean<SecurityFilter> securityFilterRegistration(
+            SecurityFilter securityFilter
+    ) {
 
-    source.registerCorsConfiguration(
-        "/**",
-        configuration
-    );
+        FilterRegistrationBean<SecurityFilter> registration =
+                new FilterRegistrationBean<>(securityFilter);
 
-    return source;
-  }
+        registration.setEnabled(false);
 
-  @Bean
-  public FilterRegistrationBean<SecurityFilter> securityFilterRegistration(
-      SecurityFilter securityFilter
-  ) {
+        return registration;
+    }
 
-    FilterRegistrationBean<SecurityFilter> registration =
-        new FilterRegistrationBean<>(securityFilter);
-
-    registration.setEnabled(false);
-
-    return registration;
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder(){
-    return new BCryptPasswordEncoder();
-  }
-
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

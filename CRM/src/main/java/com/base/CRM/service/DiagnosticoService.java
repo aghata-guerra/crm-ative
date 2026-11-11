@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class DiagnosticoService {
 
     private final DiagnosticoRepository diagnosticoRepository;
@@ -30,7 +31,8 @@ public class DiagnosticoService {
     public DiagnosticoDto createDiagnostico(DiagnosticoCreateDto createDto){
 
         Negociacao negociacao = negociacaoService.findNegociacaoById(createDto.negociacaoId());
-        User user = userService.findUserById(createDto.userId());
+        negociacaoService.requireOpen(negociacao);
+        User user = com.base.CRM.config.CrmAccess.currentUser();
 
         return DiagnosticoDto.fromEntity(diagnosticoRepository.save(createDto.toEntity(negociacao, user)));
 
@@ -39,7 +41,9 @@ public class DiagnosticoService {
     // Find by Id
 
     public Diagnostico findDiagnosticoById(Long id){
-        return diagnosticoRepository.findById(id).orElseThrow(DiagnosticoNotFoundException::new);
+        Diagnostico result = diagnosticoRepository.findById(id).orElseThrow(DiagnosticoNotFoundException::new);
+        negociacaoService.findNegociacaoById(result.getNegociacao().getId());
+        return result;
     }
 
     // Update diagnostico
@@ -48,6 +52,10 @@ public class DiagnosticoService {
 
         Diagnostico diagnostico = findDiagnosticoById(id);
 
+        negociacaoService.requireOpen(diagnostico.getNegociacao());
+        if (!diagnostico.getNegociacao().getId().equals(createDto.negociacaoId())) {
+            throw new IllegalArgumentException("O diagnóstico pertence a outra negociação.");
+        }
         diagnostico.setCompanySize(createDto.companySize());
         diagnostico.setCurrentSituation(createDto.currentSituation());
         diagnostico.setMainDifficulty(createDto.mainDifficulty());
@@ -61,7 +69,10 @@ public class DiagnosticoService {
 
     public Page<DiagnosticoDto> findAllDiagnostico(Pageable pageable){
 
-        return diagnosticoRepository.findAll(pageable).map(
+        var result = com.base.CRM.config.CrmAccess.isManager()
+            ? diagnosticoRepository.findAll(pageable)
+            : diagnosticoRepository.findByNegociacao_User_Id(com.base.CRM.config.CrmAccess.currentUser().getId(), pageable);
+        return result.map(
                 DiagnosticoDto::fromEntity
         );
     }

@@ -23,7 +23,7 @@ public class AtividadeController {
 
     @PostMapping
     public ResponseEntity<AtividadeDto> createAtividade(
-            @RequestBody AtividadeCreateDto atividadeCreateDto,
+            @jakarta.validation.Valid @RequestBody AtividadeCreateDto atividadeCreateDto,
             @AuthenticationPrincipal User user) {
 
         return ResponseEntity.status(HttpStatus.CREATED)

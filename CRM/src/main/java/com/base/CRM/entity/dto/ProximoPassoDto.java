@@ -8,6 +8,7 @@ public record ProximoPassoDto(
     Long id,
     Long negociacaoId,
     Long userId,
+    String userName,
     String description,
     LocalDate expectedDate,
     StatusProximoPasso statusProximoPasso,
@@ -20,9 +21,13 @@ public record ProximoPassoDto(
         proximoPasso.getId(),
         proximoPasso.getNegociacao().getId(),
         proximoPasso.getUser().getId(),
+        proximoPasso.getUser().getName(),
         proximoPasso.getDescription(),
         proximoPasso.getExpectedDate(),
-        proximoPasso.getStatusProximoPasso(),
+        proximoPasso.getStatusProximoPasso() != StatusProximoPasso.REALIZADA
+            && proximoPasso.getExpectedDate() != null
+            && proximoPasso.getExpectedDate().isBefore(LocalDate.now())
+            ? StatusProximoPasso.VENCIDA : proximoPasso.getStatusProximoPasso(),
         proximoPasso.getFinishedAt(),
         proximoPasso.getCreatedAt()
     );

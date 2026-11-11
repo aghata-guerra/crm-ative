@@ -19,5 +19,7 @@ public interface ProximoPassoRepository extends JpaRepository<ProximoPasso, Long
       @Param("status") StatusProximoPasso status
   );
 
+  List<ProximoPasso> findByExpectedDateBetween(LocalDate startDate, LocalDate endDate);
+
   List<ProximoPasso> findByUserId(Long userId);
 }

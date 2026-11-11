@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { list, request } from './api';
 import { ActionForm, ErrorMessage, Field } from './components';
 import { Empresas, Leads } from './cadastros';
-import { Funil, Indicadores, Oportunidade } from './oportunidades';
+import { Indicadores } from './indicadores';
+import { Funil, Oportunidade } from './oportunidades';
 import './App.css';
 
 const pages = ['Visão geral', 'Empresas', 'Leads', 'Funil'];
@@ -43,6 +44,11 @@ function Access({ onLogin, expired }) {
 
 function Workspace({ api, logout }) {
   const [page, setPage] = useState('Visão geral');
+  const [stalledDays, setStalledDays] = useState(7);
+  function openOpportunity(id) {
+    setPage('Funil');
+    setSelected(id);
+  }
   const [selected, setSelected] = useState(null);
   const [data, setData] = useState(null);
   const [version, setVersion] = useState(0);
@@ -89,12 +95,12 @@ function Workspace({ api, logout }) {
       <div className="page-heading"><h1>{page}</h1><button className="secondary" onClick={refresh}>Atualizar dados</button></div>
       <ErrorMessage error={error} />
       {!data && !error && <p role="status">Carregando CRM…</p>}
-      {data && page === 'Visão geral' && <Indicadores data={data} />}
+      {data && page === 'Visão geral' && <Indicadores data={data} onOpen={openOpportunity} stalledDays={stalledDays} setStalledDays={setStalledDays} />}
       {data && page === 'Empresas' && <Empresas empresas={data.empresas} save={save} />}
       {data && page === 'Leads' && <Leads empresas={data.empresas} leads={data.leads} save={save} refresh={refresh} />}
       {data && page === 'Funil' && (opportunity
-        ? <Oportunidade key={selected} item={opportunity} data={data} save={save} onBack={() => setSelected(null)} />
-        : <Funil data={data} save={save} onOpen={setSelected} />)}
+        ? <Oportunidade key={selected} item={opportunity} data={data} stalledDays={stalledDays} save={save} onBack={() => setSelected(null)} />
+        : <Funil stalledDays={stalledDays} data={data} save={save} onOpen={setSelected} />)}
     </main>
   </>;
 }

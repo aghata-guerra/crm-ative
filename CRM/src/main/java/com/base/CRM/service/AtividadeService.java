@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class AtividadeService {
 
   private final AtividadeRepository atividadeRepository;
@@ -31,6 +32,7 @@ public class AtividadeService {
 
     Negociacao negociacao = negociacaoService.findNegociacaoById(atividadeCreateDto.negociacaoId());
 
+    negociacaoService.requireOpen(negociacao);
     return AtividadeDto.fromEntity(atividadeRepository.save(atividadeCreateDto.toEntity(negociacao, user)));
 
   }
@@ -39,11 +41,13 @@ public class AtividadeService {
     Atividade atividade = atividadeRepository.findById(atividadeId)
             .orElseThrow(AtividadeNotFoundException::new);
 
+    negociacaoService.findNegociacaoById(atividade.getNegociacao().getId());
     return AtividadeDto.fromEntity(atividade);
   }
 
   public List<AtividadeDto> findAllAtividadesByNegociacaoId(Long negociacaoId){
 
+    negociacaoService.findNegociacaoById(negociacaoId);
     Optional<Negociacao> negociacao = negociacaoRepository.findById(negociacaoId);
 
     if(negociacao.isPresent()){

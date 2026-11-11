@@ -1,13 +1,15 @@
 
 package com.base.CRM.entity.dto;
 
+import jakarta.validation.constraints.*;
+
 import com.base.CRM.entity.User;
 import com.base.CRM.enumClass.Profile;
 
 public record UserCreateDto(
-    String name,
-    String email,
-    String password
+    @NotBlank @Size(max=100) String name,
+    @NotBlank @Email String email,
+    @NotBlank @Size(min=8, max=72) String password
 ) {
 
     public User toEntity(String encodedPassword) {

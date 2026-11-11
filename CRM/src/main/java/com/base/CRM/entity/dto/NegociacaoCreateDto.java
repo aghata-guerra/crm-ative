@@ -1,5 +1,7 @@
 package com.base.CRM.entity.dto;
 
+import jakarta.validation.constraints.*;
+
 import com.base.CRM.entity.Lead;
 import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.User;
@@ -17,7 +19,8 @@ public record NegociacaoCreateDto(
     Origin origin,
     Etapa stage,
     @NotNull(message = "O valor estimado precisa ser preenchido")
-    @jakarta.validation.constraints.PositiveOrZero(message = "O valor estimado deve ser positivo ou zero")
+    @PositiveOrZero(message = "O valor estimado deve ser positivo ou zero")
+    @Digits(integer = 17, fraction = 2)
     BigDecimal estimatedCost
 ) {
 

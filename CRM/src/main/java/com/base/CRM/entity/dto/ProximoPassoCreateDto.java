@@ -1,5 +1,7 @@
 package com.base.CRM.entity.dto;
 
+import jakarta.validation.constraints.*;
+
 import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.ProximoPasso;
 import com.base.CRM.entity.User;
@@ -15,6 +17,7 @@ public record ProximoPassoCreateDto(
     @NotNull(message = "Id do usuário precisa estar presente")
     Long userId,
     @NotBlank(message = "Descrição não pode ser ausente")
+    @Size(max = 255)
     String description,
     @NotNull(message = "Informe a data do contato")
     @FutureOrPresent(message = "Data só pode ser hoje ou no futuro")

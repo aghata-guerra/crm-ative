@@ -1,5 +1,7 @@
 package com.base.CRM.entity.dto;
 
+import jakarta.validation.constraints.*;
+
 
 import com.base.CRM.entity.Empresa;
 import com.base.CRM.entity.Lead;
@@ -12,15 +14,17 @@ import jakarta.validation.constraints.Size;
 
 public record LeadCreateDto(
     @NotBlank(message = "Nome não pode estar em branco")
-    @Size(min = 0, max = 100, message = "O nome precisa ter entre 3 e 100 caracteres")
+    @Size(min = 3, max = 100, message = "O nome precisa ter entre 3 e 100 caracteres")
     String name,
     @NotBlank(message = "O email precisa ser preenchido")
     @Email(message = "Email inválido")
+    @Size(max = 255)
     String email,
     @NotBlank(message = "O telefone precisa ser preenchido")
-    @Size(min = 0, max = 12, message = "O telegone precisa ter entre 3 e 12 caracteres")
+    @Pattern(regexp = "[0-9]{10,12}", message = "Informe um telefone com 10 a 12 dígitos")
     String telephone,
     @NotBlank(message = "A posição precisa ser preenchida")
+    @Size(max = 255)
     String position,
     @NotNull(message = "A empresa precisa ser preenchida")
     Long empresaId,

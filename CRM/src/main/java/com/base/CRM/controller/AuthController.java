@@ -40,11 +40,11 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
+  public ResponseEntity<LoginResponseDto> login(@jakarta.validation.Valid @RequestBody LoginRequestDto loginRequestDto){
 
     Authentication authentication = authenticationManager.authenticate(
         UsernamePasswordAuthenticationToken.unauthenticated(
-            loginRequestDto.email(),
+            loginRequestDto.email().trim().toLowerCase(java.util.Locale.ROOT),
             loginRequestDto.password()
         )
     );
@@ -66,7 +66,7 @@ public class AuthController {
   }
   
   @PostMapping("/register")
-  public ResponseEntity<UserDto> register(@RequestBody UserCreateDto userCreateDto){
+  public ResponseEntity<UserDto> register(@jakarta.validation.Valid @RequestBody UserCreateDto userCreateDto){
     
     return ResponseEntity
         .status(HttpStatus.CREATED)

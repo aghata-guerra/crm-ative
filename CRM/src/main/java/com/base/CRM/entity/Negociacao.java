@@ -28,6 +28,10 @@ public class Negociacao {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @jakarta.persistence.Version
+  @jakarta.persistence.Column(nullable = false, columnDefinition = "bigint default 0")
+  private long version;
+
   @ManyToOne
   @JoinColumn(name = "leadId")
   private Lead lead;
@@ -75,6 +79,17 @@ public class Negociacao {
     this.origin = origin;
     this.stage = stage;
     this.estimatedCost = estimatedCost;
+  }
+
+  public LocalDate getLastMovementDate() {
+    LocalDate latest = updatedStageDate != null ? updatedStageDate : startDate;
+    for (Atividade activity : atividadeList) {
+      LocalDate happened = activity.getHappenDate();
+      if (happened != null && (latest == null || happened.isAfter(latest))) latest = happened;
+      LocalDate created = activity.getCreatedAt();
+      if (created != null && (latest == null || created.isAfter(latest))) latest = created;
+    }
+    return latest != null ? latest : LocalDate.now();
   }
 
   public Long getId() {

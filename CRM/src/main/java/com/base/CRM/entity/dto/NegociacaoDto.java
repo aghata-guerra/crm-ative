@@ -13,6 +13,7 @@ public record NegociacaoDto(
     Long id,
     Long leadId,
     Long userId,
+    String userName,
     Origin origin,
     Etapa stage,
     StatusNegociacao statusNegociacao,
@@ -20,6 +21,7 @@ public record NegociacaoDto(
     LocalDate startDate,
     LocalDate finalDate,
     LocalDate updatedStageDate,
+    LocalDate lastMovementDate,
     String lossReason,
     List<AtividadeDto> atividadeDtoList,
     List<ProximoPassoDto> proximoPassoDtoList,
@@ -31,6 +33,7 @@ public record NegociacaoDto(
         negociacao.getId(),
         negociacao.getLead().getId(),
         negociacao.getUser().getId(),
+        negociacao.getUser().getName(),
         negociacao.getOrigin(),
         negociacao.getStage(),
         negociacao.getStatusNegociacao(),
@@ -40,6 +43,7 @@ public record NegociacaoDto(
             ? negociacao.getFinalDate() : null,
         negociacao.getUpdatedStageDate() != null
             ? negociacao.getUpdatedStageDate() : null,
+        negociacao.getLastMovementDate(),
         negociacao.getLossReason(),
         negociacao.getAtividadeList() != null
             ? negociacao.getAtividadeList().stream().toList().stream().map(AtividadeDto :: fromEntity).toList()

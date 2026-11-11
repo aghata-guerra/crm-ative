@@ -100,7 +100,7 @@ public class User implements UserDetails {
   }
 
   public Boolean getActive() {
-    return active;
+    return Boolean.TRUE.equals(active);
   }
 
   public void setActive(Boolean active) {
@@ -171,6 +171,6 @@ public class User implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return Boolean.TRUE.equals(active);
   }
 }

@@ -48,7 +48,7 @@ public class EmpresaController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<EmpresaDto> createEmpresaManual(@RequestBody EmpresaCreateDto createDto){
+    public ResponseEntity<EmpresaDto> createEmpresaManual(@jakarta.validation.Valid @RequestBody EmpresaCreateDto createDto){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(empresaService.createEmpresaManual(createDto));

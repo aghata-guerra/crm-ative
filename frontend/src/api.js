@@ -24,6 +24,7 @@ export async function request(path, { token, method = 'GET', body, signal } = {}
       ? 'Credenciais inválidas ou sessão expirada.'
       : 'A API retornou o erro ' + response.status + '.'));
     error.status = response.status;
+    error.details = payload;
     throw error;
   }
   return payload;

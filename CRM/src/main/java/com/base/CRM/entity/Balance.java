@@ -14,6 +14,10 @@ public class Balance {
   @Id
   private Long id = 1L;
 
+  @jakarta.persistence.Version
+  @Column(nullable = false, columnDefinition = "bigint default 0")
+  private long version;
+
   @Column(nullable = false)
   private BigDecimal currentBalance = BigDecimal.ZERO;
   @Column(nullable = false)

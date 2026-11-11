@@ -1,8 +1,10 @@
 package com.base.CRM.entity.dto;
 
+import jakarta.validation.constraints.*;
+
 public record LoginRequestDto(
-    String email,
-    String password
+    @NotBlank @Email String email,
+    @NotBlank String password
 ) {
 
 }

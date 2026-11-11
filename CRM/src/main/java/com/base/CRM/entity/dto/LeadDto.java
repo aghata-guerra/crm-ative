@@ -28,7 +28,7 @@ public record LeadDto(
         lead.getCreatedAt(),
         lead.getCompany().getId(),
         lead.getNegociacaoList() != null
-            ? lead.getNegociacaoList().stream().map(NegociacaoDto :: fromEntity).toList()
+            ? lead.getNegociacaoList().stream().filter(com.base.CRM.config.CrmAccess::canView).map(NegociacaoDto :: fromEntity).toList()
             : null
     );
   }

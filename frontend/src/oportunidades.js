@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { openDeal, alerts, date, today } from './indicadores';
 import { origins } from './origens';
 import { ActionForm, Field, Select, Table } from './components';
 
@@ -6,6 +7,7 @@ const stages = [
   ['NOVO_LEAD', 'Novo lead'], ['QUALIFICACAO', 'Qualificação'],
   ['DIAGNOSTICO', 'Diagnóstico'], ['PROPOSTA', 'Proposta'],
 ];
+const lossReasons = ['Preço', 'Sem prioridade agora', 'Escolheu concorrente', 'Sem resposta', 'Não se encaixa no serviço', 'Outro'];
 const statuses = [
   ['EM_NEGOCIACAO', 'Em negociação'], ['ENCERRADA_GANHA', 'Ganha'], ['ENCERRADA_PERDA', 'Perdida'],
 ];
@@ -13,70 +15,10 @@ const types = [['CONVERSA', 'Conversa'], ['REUNIAO', 'Reunião'], ['PROPOSTA', '
 const stageNames = Object.fromEntries(stages);
 const statusNames = Object.fromEntries(statuses);
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-const stalledDays = 7;
-
-function today() {
-  return new Intl.DateTimeFormat('sv-SE').format(new Date());
-}
-function date(value) {
-  return value ? value.split('-').reverse().join('/') : '—';
-}
-function daysBetween(start, end) {
-  return Math.round((Date.parse(end) - Date.parse(start)) / 86400000);
-}
-const isOpen = item => item.statusNegociacao === 'EM_NEGOCIACAO';
+const isOpen = openDeal;
 const pending = step => step.statusProximoPasso !== 'REALIZADA';
 
-function alerts(item) {
-  if (!isOpen(item)) return [];
-  const steps = (item.proximoPassoDtoList || []).filter(pending);
-  const now = today();
-  return [
-    !steps.length && 'Sem próximo passo',
-    steps.some(step => step.expectedDate && step.expectedDate < now) && 'Contato atrasado',
-    steps.some(step => step.expectedDate === now) && 'Contato hoje',
-    daysBetween(item.updatedStageDate || item.startDate, now) >= stalledDays && 'Parada há 7 dias ou mais',
-  ].filter(Boolean);
-}
-
-export function Indicadores({ data }) {
-  const { empresas, leads, oportunidades, user } = data;
-  const wins = oportunidades.filter(item => item.statusNegociacao === 'ENCERRADA_GANHA');
-  const losses = oportunidades.filter(item => item.statusNegociacao === 'ENCERRADA_PERDA');
-  const closed = [...wins, ...losses].filter(item => item.startDate && item.finalDate);
-  const average = closed.length ? closed.reduce((sum, item) =>
-    sum + daysBetween(item.startDate, item.finalDate), 0) / closed.length : null;
-  const leadNames = new Map(leads.map(item => [item.id, item.name]));
-  const metrics = [
-    ['Empresas', empresas.length], ['Leads', leads.length],
-    ['Em negociação', oportunidades.filter(isOpen).length], ['Vendas ganhas', wins.length],
-    ['Tempo médio até fechar', average === null ? '—' : average.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' dias'],
-  ];
-  return <div className="stack">
-    <p className="muted">{user.profile === 'GESTOR' ? 'Oportunidades da equipe' : 'Minhas oportunidades'}</p>
-    <div className="metrics">{metrics.map(([title, number]) => <div className="panel" key={title}>
-      <span>{title}</span><strong>{number}</strong>
-    </div>)}</div>
-    <section className="panel"><h2>Alertas de acompanhamento</h2>
-      <Table columns={['Lead', 'Alerta']} rows={oportunidades.flatMap(item => {
-        const messages = alerts(item);
-        return messages.length ? [[item.id, leadNames.get(item.leadId) || 'Lead #' + item.leadId, messages.join(' · ')]] : [];
-      })} />
-    </section>
-    <div className="split">
-      <section className="panel"><h2>Vendas ganhas por origem</h2>
-        <Table columns={['Origem', 'Vendas ganhas']} rows={origins.map(([key, caption]) =>
-          [key, caption, wins.filter(item => item.origin === key).length])} />
-      </section>
-      <section className="panel"><h2>Perdas por etapa</h2>
-        <Table columns={['Etapa de encerramento', 'Perdas']} rows={stages.map(([key, caption]) =>
-          [key, caption, losses.filter(item => item.stage === key).length])} />
-      </section>
-    </div>
-  </div>;
-}
-
-export function Funil({ data, save, onOpen }) {
+export function Funil({ data, save, onOpen, stalledDays = 7 }) {
   const [filter, setFilter] = useState('EM_NEGOCIACAO');
   const leads = new Map(data.leads.map(item => [item.id, item.name]));
   const [leadId, setLeadId] = useState('');
@@ -107,8 +49,10 @@ export function Funil({ data, save, onOpen }) {
         <h2>{caption} <span>{items.length}</span></h2>
         {items.map(item => <button type="button" className="deal" key={item.id} onClick={() => onOpen(item.id)}>
           <strong>{leads.get(item.leadId) || 'Lead #' + item.leadId}</strong>
+          <span>Responsável · {item.userName || "Usuário #" + item.userId}</span>
+          <span>Última movimentação · {date(item.lastMovementDate || item.updatedStageDate || item.startDate)}</span>
           <span>{money.format(item.estimatedCost)} · {statusNames[item.statusNegociacao]}</span>
-          {alerts(item).map(alert => <span key={alert} className="warning">{alert}</span>)}
+          {alerts(item, stalledDays).map(alert => <span key={alert} className="warning">{alert}</span>)}
         </button>)}
         {!items.length && <p className="muted">Nenhuma oportunidade</p>}
       </section>;
@@ -116,7 +60,7 @@ export function Funil({ data, save, onOpen }) {
   </div>;
 }
 
-export function Oportunidade({ item, data, save, onBack }) {
+export function Oportunidade({ item, data, save, onBack, stalledDays = 7 }) {
   const path = '/negociacao/' + item.id;
   const canEdit = isOpen(item) && (data.user.profile === 'GESTOR' || data.user.userId === item.userId);
   const context = { negociacaoId: item.id, userId: data.user.userId };
@@ -128,17 +72,19 @@ export function Oportunidade({ item, data, save, onBack }) {
     <section className="panel">
       <h2>{lead?.name || 'Lead #' + item.leadId}</h2>
       <p>{stageNames[item.stage]} · {statusNames[item.statusNegociacao]} · {money.format(item.estimatedCost)}</p>
+      <p>Responsável · {item.userName || "Usuário #" + item.userId}</p>
+      <p>Última movimentação · {date(item.lastMovementDate || item.updatedStageDate || item.startDate)}</p>
       <p className="muted">Aberta em {date(item.startDate)}{item.finalDate && ' · Encerrada em ' + date(item.finalDate)}</p>
       {item.lossReason && <p><strong>Motivo da perda</strong> {item.lossReason}</p>}
-      {alerts(item).map(alert => <p className="warning" key={alert}>{alert}</p>)}
+      {alerts(item, stalledDays).map(alert => <p className="warning" key={alert}>{alert}</p>)}
       {canEdit && <ActionForm key={item.stage} className="grid-form" label="Mover oportunidade"
         action={values => save(path + '/etapa', values.stage, 'PATCH').then(() => undefined)}>
         <Select label="Nova etapa" name="stage" options={stages.filter(([key]) => key !== item.stage)} />
       </ActionForm>}
     </section>
     <section className="panel"><h2>Histórico comercial</h2>
-      <Table columns={['Data', 'Tipo', 'Descrição']} rows={history.map(entry =>
-        [entry.id, date(entry.happenDate), Object.fromEntries(types)[entry.type], entry.description])} />
+      <Table columns={['Data', 'Tipo', 'Descrição', 'Responsável']} rows={history.map(entry =>
+        [entry.id, date(entry.happenDate), Object.fromEntries(types)[entry.type], entry.description, entry.userName || "Usuário #" + entry.userId])} />
       {canEdit && <ActionForm className="grid-form" label="Registrar atividade" action={async values => {
         await save('/atividade', { ...values, ...context });
       }}>
@@ -148,8 +94,8 @@ export function Oportunidade({ item, data, save, onBack }) {
       </ActionForm>}
     </section>
     <section className="panel"><h2>Próximos passos</h2>
-      <Table columns={['Contato', 'Descrição', 'Status', 'Ações']} rows={steps.map(step => [
-        step.id, date(step.expectedDate), step.description,
+      <Table columns={['Contato', 'Descrição', 'Responsável', 'Status', 'Ações']} rows={steps.map(step => [
+        step.id, date(step.expectedDate), step.description, step.userName || "Usuário #" + step.userId,
         pending(step) ? (step.expectedDate < today() ? 'Vencido' : 'Agendado') : 'Realizado',
         canEdit && pending(step) ? <div className="step-actions">
           <ActionForm label="Concluir" action={async () => { await save('/proximopasso/' + step.id + '/status', 'REALIZADA', 'PATCH'); }} />
@@ -185,11 +131,13 @@ export function Oportunidade({ item, data, save, onBack }) {
           <ActionForm label="Confirmar venda" action={async () => { await save(path + '/finalizar/ganha', undefined, 'PATCH'); }} />
         </details>
         <details><summary>Marcar como perdida</summary>
-          <ActionForm label="Confirmar perda" action={async ({ lossReason }) => {
+          <ActionForm label="Confirmar perda" action={async ({ lossReason, lossDetail }) => {
+            if (lossReason === 'Outro' && !lossDetail.trim()) throw new Error('Descreva o outro motivo da perda.');
             if (!lossReason.trim()) throw new Error('Informe o motivo da perda.');
-            await save(path + '/finalizar/perda', { lossReason: lossReason.trim() }, 'PATCH');
+            await save(path + '/finalizar/perda', { lossReason: lossReason === 'Outro' ? 'Outro · ' + lossDetail.trim() : lossReason }, 'PATCH');
           }}>
-            <Field label="Motivo da perda"><textarea name="lossReason" maxLength={255} required /></Field>
+            <Select label="Motivo da perda" name="lossReason" options={lossReasons.map(reason => [reason, reason])} />
+            <Field label="Detalhe para outro motivo" name="lossDetail" maxLength={200} required={false} />
           </ActionForm>
         </details>
       </div>

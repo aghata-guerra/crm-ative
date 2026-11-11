@@ -25,6 +25,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -62,7 +63,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(
                 auth -> auth
-                    .requestMatchers("/auth/login", "/auth/register").permitAll()
+                    .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(errors -> errors.authenticationEntryPoint(

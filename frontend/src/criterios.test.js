@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Indicadores } from './indicadores';
 import { Leads } from './cadastros';
 import { ImportarLeads } from './importacao';
@@ -24,8 +24,7 @@ test('relatório aplica período, mostra amostra e permite conferir as vendas', 
   fireEvent.change(screen.getByLabelText('Fechamentos a partir de'), { target: { value: '2025-01-01' } });
   fireEvent.change(screen.getByLabelText('Fechamentos até'), { target: { value: '2025-01-31' } });
   expect(screen.getByText('9 dias')).toBeInTheDocument();
-  const originRow = screen.getByRole('cell', { name: 'Indicação' }).closest('tr');
-  fireEvent.click(within(originRow).getByRole('button', { name: 'Conferir vendas' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Conferir vendas de Indicação' }));
   fireEvent.click(screen.getByRole('button', { name: 'Abrir oportunidade' }));
   expect(onOpen).toHaveBeenCalledWith(1);
 });

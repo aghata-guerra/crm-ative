@@ -1,12 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { list, request } from './api';
 import { ActionForm, ErrorMessage, Field } from './components';
+import { Agenda } from './agenda';
 import { Empresas, Leads } from './cadastros';
 import { Indicadores } from './indicadores';
 import { Funil, Oportunidade } from './oportunidades';
 import './App.css';
 
-const pages = ['Visão geral', 'Empresas', 'Leads', 'Funil'];
+const pages = [
+  { key: 'Funil', label: 'Funil comercial', icon: '◫' },
+  { key: 'Agenda', label: 'Próximos passos', icon: '▣' },
+  { key: 'Indicadores', label: 'Indicadores', icon: '▥' },
+  { key: 'Empresas', label: 'Empresas', icon: '▤', group: 'Cadastros' },
+  { key: 'Leads', label: 'Leads e contatos', icon: '◉' },
+];
+const headings = {
+  Funil: ['VISÃO COMERCIAL', 'Funil de oportunidades', 'Acompanhe cada negócio, do primeiro contato à decisão.'],
+  Agenda: ['AGENDA COMERCIAL', 'Próximos passos', 'Priorize pendências e mantenha cada oportunidade com uma próxima ação.'],
+  Indicadores: ['RESULTADOS COMERCIAIS', 'Indicadores comerciais', 'Acompanhe os resultados e confira os registros de cada indicador.'],
+  Empresas: ['CADASTROS', 'Empresas', 'Centralize as informações das empresas atendidas pela equipe.'],
+  Leads: ['CADASTROS', 'Leads e contatos', 'Organize seus contatos e registre a origem de cada oportunidade.'],
+};
 const sessionKey = 'ative-crm-token';
 
 function Access({ onLogin, expired }) {
@@ -43,10 +57,9 @@ function Access({ onLogin, expired }) {
 }
 
 function Workspace({ api, logout }) {
-  const [page, setPage] = useState('Visão geral');
+  const [page, setPage] = useState('Funil');
   const [stalledDays, setStalledDays] = useState(7);
   function openOpportunity(id) {
-    setPage('Funil');
     setSelected(id);
   }
   const [selected, setSelected] = useState(null);
@@ -83,26 +96,53 @@ function Workspace({ api, logout }) {
   }
 
   const opportunity = data?.oportunidades.find(item => item.id === selected);
-  return <>
-    <header className="top">
-      <span className="brand">ative<span>.</span></span>
-      <nav aria-label="Navegação principal">{pages.map(item => <button key={item}
-        aria-current={item === page ? 'page' : undefined}
-        onClick={() => { setPage(item); setSelected(null); }}>{item}</button>)}</nav>
-      <div className="account">{data?.user.name}<button className="secondary" onClick={logout}>Sair</button></div>
-    </header>
-    <main className="workspace">
-      <div className="page-heading"><h1>{page}</h1><button className="secondary" onClick={refresh}>Atualizar dados</button></div>
-      <ErrorMessage error={error} />
-      {!data && !error && <p role="status">Carregando CRM…</p>}
-      {data && page === 'Visão geral' && <Indicadores data={data} onOpen={openOpportunity} stalledDays={stalledDays} setStalledDays={setStalledDays} />}
-      {data && page === 'Empresas' && <Empresas empresas={data.empresas} save={save} />}
-      {data && page === 'Leads' && <Leads empresas={data.empresas} leads={data.leads} save={save} refresh={refresh} />}
-      {data && page === 'Funil' && (opportunity
-        ? <Oportunidade key={selected} item={opportunity} data={data} stalledDays={stalledDays} save={save} onBack={() => setSelected(null)} />
-        : <Funil stalledDays={stalledDays} data={data} save={save} onOpen={setSelected} />)}
-    </main>
-  </>;
+  const [eyebrow, title, description] = headings[page];
+  const initials = (data?.user.name || '').split(/\s+/).filter(Boolean).map(part => part[0]).slice(0, 2).join('');
+  return <div className="app-shell">
+    <aside className="sidebar">
+      <div className="sidebar-brand"><span className="brand-mark">A</span><span className="brand">ative</span><small>CRM</small></div>
+      <nav aria-label="Navegação principal">
+        <p className="nav-group">Principal</p>
+        {pages.map(item => <div key={item.key}>
+          {item.group && <p className="nav-group">{item.group}</p>}
+          <button aria-current={item.key === page ? 'page' : undefined}
+            onClick={() => { setPage(item.key); setSelected(null); }}>
+            <span aria-hidden="true" className="nav-icon">{item.icon}</span>{item.label}
+          </button>
+        </div>)}
+      </nav>
+      <div className="sidebar-footer"><strong>Gestão comercial</strong>
+        <span>{data?.user.profile === 'GESTOR' ? 'Visão da equipe' : 'Sua carteira de oportunidades'}</span>
+      </div>
+    </aside>
+    <div className="app-main">
+      <header className="top">
+        <p className="breadcrumb">Comercial <span>/</span> <strong>{pages.find(item => item.key === page).label}</strong></p>
+        <div className="account">
+          <span className="account-name">{data?.user.name}<small>{data?.user.profile === 'GESTOR' ? 'Gestor · equipe' : 'Vendedor · minha carteira'}</small></span>
+          <span className="avatar" aria-hidden="true">{initials || '·'}</span>
+          <button className="logout" onClick={logout}>Sair</button>
+        </div>
+      </header>
+      <main className="workspace">
+        <div className="page-heading">
+          <div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="page-description">{description}</p></div>
+          <div className="heading-actions">
+            <button className="secondary refresh-button" onClick={refresh} aria-label="Atualizar dados" title="Atualizar dados">↻</button>
+            {['Funil', 'Agenda'].includes(page) && <button onClick={() => setPage('Leads')}>+ Novo lead</button>}
+          </div>
+        </div>
+        <ErrorMessage error={error} />
+        {!data && !error && <p role="status" className="loading">Carregando CRM…</p>}
+        {data && page === 'Indicadores' && <Indicadores data={data} onOpen={openOpportunity} stalledDays={stalledDays} setStalledDays={setStalledDays} />}
+        {data && page === 'Agenda' && <Agenda data={data} onOpen={openOpportunity} stalledDays={stalledDays} setStalledDays={setStalledDays} />}
+        {data && page === 'Empresas' && <Empresas empresas={data.empresas} save={save} />}
+        {data && page === 'Leads' && <Leads empresas={data.empresas} leads={data.leads} save={save} refresh={refresh} />}
+        {data && page === 'Funil' && <Funil stalledDays={stalledDays} data={data} save={save} onOpen={openOpportunity} />}
+      </main>
+    </div>
+    {opportunity && <Oportunidade key={selected} item={opportunity} data={data} stalledDays={stalledDays} save={save} onBack={() => setSelected(null)} />}
+  </div>;
 }
 
 export default function App() {

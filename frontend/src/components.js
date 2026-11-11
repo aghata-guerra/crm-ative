@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function ErrorMessage({ error }) {
   return error && <p className="error" role="alert">{error}</p>;
@@ -56,4 +56,23 @@ export function Table({ columns, rows }) {
       {cells.map((cell, index) => <td key={columns[index]}>{cell ?? '—'}</td>)}
     </tr>)}</tbody>
   </table></div>;
+}
+
+export function Drawer({ title, onClose, children }) {
+  const dialog = useRef(null);
+  useEffect(() => {
+    const element = dialog.current;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    element.showModal();
+    return () => {
+      element.close();
+      document.body.style.overflow = overflow;
+    };
+  }, []);
+  return <dialog ref={dialog} className="drawer" aria-label={title}
+    onCancel={event => { event.preventDefault(); onClose(); }}
+    onClick={event => {
+      if (event.target === event.currentTarget && event.clientX < event.currentTarget.getBoundingClientRect().left) onClose();
+    }}>{children}</dialog>;
 }

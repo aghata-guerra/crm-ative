@@ -86,7 +86,7 @@ Abra outro terminal na raiz do projeto:
 ```powershell
 cd frontend
 npm ci
-npm start
+npm run dev
 ```
 
 Acesse:

@@ -38,9 +38,7 @@ public class LeadController {
     // Buscar lead pelo ID
     @GetMapping("/{id}")
     public LeadDto findLeadById(@PathVariable Long id) {
-        return LeadDto.fromEntity(
-                leadService.findLeadById(id)
-        );
+        return leadService.getLead(id);
     }
 
     // Buscar leads pelo ID da empresa

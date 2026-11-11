@@ -1,5 +1,6 @@
 package com.base.CRM.service;
 
+import com.base.CRM.entity.Atividade;
 import com.base.CRM.entity.Lead;
 import com.base.CRM.entity.Negociacao;
 import com.base.CRM.entity.User;
@@ -7,6 +8,7 @@ import com.base.CRM.entity.dto.NegociacaoCreateDto;
 import com.base.CRM.entity.dto.NegociacaoDto;
 import com.base.CRM.entity.dto.NegociacoesPorOrigemDto;
 import com.base.CRM.enumClass.Etapa;
+import com.base.CRM.enumClass.Tipo;
 import com.base.CRM.enumClass.StatusNegociacao;
 import com.base.CRM.exception.NegociacaoClosedException;
 import com.base.CRM.exception.NegociacaoNotFoundException;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class NegociacaoService {
 
   private final NegociacaoRepository negociacaoRepository;
@@ -44,6 +47,10 @@ public class NegociacaoService {
     return NegociacaoDto.fromEntity(
         negociacaoRepository.save(negociacaoDto.toEntity(lead, user))
     );
+  }
+
+  public NegociacaoDto getNegociacao(Long id) {
+    return NegociacaoDto.fromEntity(findNegociacaoById(id));
   }
 
   public Negociacao findNegociacaoById(Long id) {
@@ -88,14 +95,13 @@ public class NegociacaoService {
   
   // Só gestores podem alterar o stage
   @Transactional
-  public NegociacaoDto updateStageNegociacao(Long negociacaoId, Etapa etapa) {
+  public NegociacaoDto updateStageNegociacao(Long negociacaoId, Etapa etapa, User actor) {
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
 
     if(verifyIfNegociacaoIsValid(negociacao)){
 
-    negociacao.setStage(etapa);
-    negociacao.setUpdatedStageDate(LocalDate.now());
+    registerStageChange(negociacao, etapa, actor);
     return NegociacaoDto.fromEntity(negociacaoRepository.save(negociacao));
 
     } else {
@@ -104,33 +110,36 @@ public class NegociacaoService {
 
   }
   @Transactional
-  public NegociacaoDto nextStageUpdate(Long negociacaoId) {
+  public NegociacaoDto nextStageUpdate(Long negociacaoId, User actor) {
 
     Negociacao negociacao = findNegociacaoById(negociacaoId);
 
     if(verifyIfNegociacaoIsValid(negociacao)){
 
-      switch (negociacao.getStage()) {
-        
-        case NOVO_LEAD:
-          negociacao.setStage(Etapa.QUALIFICACAO);
-          break;
-        case QUALIFICACAO:
-          negociacao.setStage(Etapa.DIAGNOSTICO);
-          break;
-        case PROPOSTA:
-          negociacao.setStage(Etapa.PROPOSTA);
-          break;
-        default:
-          throw new StageChangeException();
-      }
-      negociacao.setUpdatedStageDate(LocalDate.now());
+      Etapa nextStage = switch (negociacao.getStage()) {
+        case NOVO_LEAD -> Etapa.QUALIFICACAO;
+        case QUALIFICACAO -> Etapa.DIAGNOSTICO;
+        case DIAGNOSTICO -> Etapa.PROPOSTA;
+        case PROPOSTA -> throw new StageChangeException();
+      };
+      registerStageChange(negociacao, nextStage, actor);
       return NegociacaoDto.fromEntity(negociacaoRepository.save(negociacao));
 
     } else {
       throw new NegociacaoClosedException();
     }
 
+  }
+
+  private void registerStageChange(Negociacao negociacao, Etapa etapa, User actor) {
+    Etapa previous = negociacao.getStage();
+    if (previous == etapa) return;
+
+    LocalDate today = LocalDate.now();
+    negociacao.getAtividadeList().add(new Atividade(null, negociacao, actor,
+        Tipo.OBSERVACAO, "Mudança de etapa: " + previous + " → " + etapa, today));
+    negociacao.setStage(etapa);
+    negociacao.setUpdatedStageDate(today);
   }
 
   public Page<NegociacaoDto> findAllNegociacaoByEtapaAndStatusNegociacao(Etapa etapa, StatusNegociacao statusNegociacao, Pageable page) {

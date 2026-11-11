@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class LeadService {
 
   private final LeadRepository leadRepository;
@@ -35,7 +36,7 @@ public class LeadService {
     Optional<Lead> holderLead = consultIfLeadsRegistered(lead);
 
     if(holderLead.isPresent()){
-      throw new LeadAlreadyExistsException("Email já cadastrado no sistema!", holderLead.get().getId());
+      throw new LeadAlreadyExistsException("E-mail ou telefone já cadastrado no sistema!", holderLead.get().getId());
     }
     
     Empresa holder = empresaService.findEmpresaById(lead.empresaId());
@@ -58,6 +59,10 @@ public class LeadService {
   }
 
   // Find Lead by Id
+
+  public LeadDto getLead(Long id) {
+    return LeadDto.fromEntity(findLeadById(id));
+  }
 
   public Lead findLeadById(Long id){
     return leadRepository.findById(id).orElseThrow(LeadNotFoundException::new);

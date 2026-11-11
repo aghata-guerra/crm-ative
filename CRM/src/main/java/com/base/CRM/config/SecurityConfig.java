@@ -62,9 +62,11 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(
                 auth -> auth
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/auth/login", "/auth/register").permitAll()
                     .anyRequest().authenticated()
             )
+            .exceptionHandling(errors -> errors.authenticationEntryPoint(
+                (request, response, error) -> response.setStatus(401)))
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .addFilterBefore(

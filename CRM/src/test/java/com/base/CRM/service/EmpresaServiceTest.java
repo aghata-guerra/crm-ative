@@ -38,7 +38,7 @@ class EmpresaServiceTest {
     EmpresaCreateDto empresaCreateDto = new EmpresaCreateDto("EmpresaTeste", "EmpresaTeste", "95.282.948/0001-93", new ArrayList<>(
         List.of(telefoneCreateDto)), "empresa@empresa.com");
     Empresa empresa = new Empresa(1L , "EmpresaTeste", "EmpresaTeste", "95.282.948/0001-93", "8112345678", "empresa@empresa.com");
-    Mockito.when(consultApiCnpj.consultCnpj("95.282.948/0001-93")).thenReturn(empresaCreateDto);
+    Mockito.when(consultApiCnpj.consultCnpj("95282948000193")).thenReturn(empresaCreateDto);
     Mockito.when(empresaRepository.save(any(Empresa.class))).thenReturn(empresa);
 
     EmpresaDto expectedDto = empresaService.createEmpresa("95.282.948/0001-93");

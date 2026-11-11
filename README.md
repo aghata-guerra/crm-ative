@@ -22,26 +22,12 @@ O projeto está sendo desenvolvido pelo **Squad 53**, com integração entre fro
 
 ## Funcionalidades
 
-### Implementadas e testadas
-
-- Cadastro de usuários pela interface React.
-- Login com autenticação JWT.
-- Perfil padrão `VENDEDOR` para novos usuários.
-- Dashboard com total de leads.
-- Listagem de leads com paginação.
-- Integração do frontend com os endpoints de leads e empresas.
-- Cadastro de leads vinculado a empresas existentes.
-- Persistência de usuários no banco H2 após reiniciar o backend.
-
-### Em desenvolvimento
-
-- Cadastro de empresas pela interface React.
-- Funil de vendas.
-- Relatórios e indicadores comerciais.
-- Outras funcionalidades de gerenciamento de oportunidades.
+- Cadastro de usuários e autenticação com JWT.
+- Cadastro de empresas e leads, com origem e importação de leads por CSV.
+- Funil por etapa, histórico, diagnóstico, próximos passos e fechamento com motivo de perda.
+- Painel com alertas no CRM e indicadores de vendas.
 
 ---
-
 ## Como Executar Localmente
 
 ### Pré-requisitos
@@ -52,19 +38,13 @@ O projeto está sendo desenvolvido pelo **Squad 53**, com integração entre fro
 
 O projeto utiliza o Maven Wrapper, portanto não é necessário instalar o Maven separadamente.
 
-### 1. Clonar o repositório
+### 1. Abrir o repositório local
 
-```bash
-git clone https://github.com/aghata-guerra/crm-ative.git
-cd crm-ative
+Na pasta que contém os diretórios `CRM` e `frontend`, selecione a branch da entrega:
+
+```powershell
+git switch feat/finalizacao-crm
 ```
-
-Para utilizar a versão de integração:
-
-```bash
-git switch integracao-frontend-thales
-```
-
 ### 2. Configurar o backend
 
 Abra um terminal PowerShell na pasta `CRM`:
@@ -105,7 +85,7 @@ Abra outro terminal na raiz do projeto:
 
 ```powershell
 cd frontend
-npm install
+npm ci
 npm start
 ```
 

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,11 @@ public class AuthController {
     this.authenticationManager = authenticationManager;
     this.jwtService = jwtService;
     this.userService = userService;
+  }
+
+  @GetMapping("/me")
+  public UserDto me(@AuthenticationPrincipal User user) {
+    return UserDto.fromEntity(user);
   }
 
   @PostMapping("/login")

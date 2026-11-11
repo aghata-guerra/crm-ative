@@ -1,6 +1,10 @@
 package com.base.CRM.handler;
 
+import com.base.CRM.exception.AlreadyExistsException;
+import com.base.CRM.exception.IncorrectCnpjException;
 import com.base.CRM.exception.LeadAlreadyExistsException;
+import com.base.CRM.exception.NegociacaoClosedException;
+import com.base.CRM.exception.StageChangeException;
 import com.base.CRM.exception.NotFoundException;
 import com.base.CRM.exception.RestErrorClass;
 import java.util.HashMap;
@@ -42,6 +46,18 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(restErrorClass);
   }
   
+  @ExceptionHandler({AlreadyExistsException.class, NegociacaoClosedException.class, StageChangeException.class})
+  public ResponseEntity<RestErrorClass> handleConflict(RuntimeException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new RestErrorClass(HttpStatus.CONFLICT, ex.getMessage()));
+  }
+
+  @ExceptionHandler(IncorrectCnpjException.class)
+  public ResponseEntity<RestErrorClass> handleInvalidCnpj(IncorrectCnpjException ex) {
+    return ResponseEntity.badRequest()
+        .body(new RestErrorClass(HttpStatus.BAD_REQUEST, ex.getMessage()));
+  }
+
   @ExceptionHandler(LeadAlreadyExistsException.class)
   public ResponseEntity<?> handleLeadAlreadyExistsException(
       LeadAlreadyExistsException ex

@@ -32,7 +32,7 @@ public class EmpresaController {
 
     @GetMapping("/{id}")
     public EmpresaDto getEmpresaById(@PathVariable Long id){
-        return EmpresaDto.fromEntity(empresaService.findEmpresaById(id));
+        return empresaService.getEmpresa(id);
     }
 
     @GetMapping("/cnpj/{cnpj}")

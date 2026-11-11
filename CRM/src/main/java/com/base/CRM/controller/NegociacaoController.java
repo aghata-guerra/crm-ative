@@ -39,7 +39,7 @@ public class NegociacaoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<NegociacaoDto> getNegociacaoById(@PathVariable Long id){
-        return ResponseEntity.ok(NegociacaoDto.fromEntity(negociacaoService.findNegociacaoById(id)));
+        return ResponseEntity.ok(negociacaoService.getNegociacao(id));
     }
 
     @GetMapping
@@ -83,19 +83,19 @@ public class NegociacaoController {
     @PatchMapping("/{negociacaoId}/etapa")
     public ResponseEntity<NegociacaoDto> updateStageNegociacao(
             @PathVariable Long negociacaoId,
-            @RequestBody Etapa etapa) {
+            @RequestBody Etapa etapa, @AuthenticationPrincipal User user) {
 
         return ResponseEntity.ok(
-                negociacaoService.updateStageNegociacao(negociacaoId, etapa)
+                negociacaoService.updateStageNegociacao(negociacaoId, etapa, user)
         );
     }
     
     @PatchMapping("/{negociacaoId}/nextstage")
     public ResponseEntity<NegociacaoDto> nextStageUpdate(
-        @PathVariable Long negociacaoId
+        @PathVariable Long negociacaoId, @AuthenticationPrincipal User user
     ) {
       return ResponseEntity.ok(
-          negociacaoService.nextStageUpdate(negociacaoId)
+          negociacaoService.nextStageUpdate(negociacaoId, user)
       );
     }
 

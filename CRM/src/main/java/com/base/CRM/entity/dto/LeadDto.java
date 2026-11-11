@@ -1,6 +1,7 @@
 package com.base.CRM.entity.dto;
 
 import com.base.CRM.entity.Lead;
+import com.base.CRM.enumClass.Origin;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,6 +11,7 @@ public record LeadDto(
     String email,
     String telephone,
     String position,
+    Origin origin,
     LocalDateTime createdAt,
     Long empresaId,
     List<NegociacaoDto> negociacaoDtoList
@@ -22,6 +24,7 @@ public record LeadDto(
         lead.getEmail(),
         lead.getTelephone(),
         lead.getPosition(),
+        lead.getOrigin(),
         lead.getCreatedAt(),
         lead.getCompany().getId(),
         lead.getNegociacaoList() != null

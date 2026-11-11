@@ -17,6 +17,7 @@ public record NegociacaoCreateDto(
     Origin origin,
     Etapa stage,
     @NotNull(message = "O valor estimado precisa ser preenchido")
+    @jakarta.validation.constraints.PositiveOrZero(message = "O valor estimado deve ser positivo ou zero")
     BigDecimal estimatedCost
 ) {
 

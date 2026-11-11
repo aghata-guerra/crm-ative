@@ -35,7 +35,7 @@ public class EmpresaController {
         return EmpresaDto.fromEntity(empresaService.findEmpresaById(id));
     }
 
-    @GetMapping("/{cnpj}")
+    @GetMapping("/cnpj/{cnpj}")
     public EmpresaDto getEmpresaByCnpj(@PathVariable String cnpj){
         return empresaService.findEmpresaByCnpj(cnpj);
     }

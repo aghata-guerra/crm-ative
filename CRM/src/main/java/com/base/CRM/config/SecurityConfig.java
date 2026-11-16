@@ -85,16 +85,18 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Origens autorizadas para acessar o backend
-        configuration.setAllowedOrigins(
-            List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:5174",
-                "http://localhost:5175"
-            )
-        );
+      configuration.setAllowedOrigins(
+          List.of(
+              "http://localhost:3000",
+              "http://localhost:5173",
+              "http://localhost:5174",
+              "http://localhost:5175",
+              "https://crm-ative-q4qelohqn-crm-ative.vercel.app"
+          )
+      );
 
-        // Metodos HTTP permitidos
+
+      // Metodos HTTP permitidos
         configuration.setAllowedMethods(
             List.of(
                 "GET",
